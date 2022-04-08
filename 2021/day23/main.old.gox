@@ -1,0 +1,397 @@
+package main1
+
+import (
+	"fmt"
+	"math"
+	"strings"
+)
+
+type Coordinate struct {
+	row, col int
+}
+
+func parseData(aString string) map[string]string {
+	data := map[string]string{}
+	lines := strings.Split(aString, "\n")
+	counts := map[string]int{}
+	for row, line := range lines {
+		s := strings.TrimSpace(line)
+		if len(s) > 0 {
+			if len(s) < 12 {
+				s = "  " + s + "  "
+			}
+			for col, character := range s {
+				cellContent := string(character)
+				counts[cellContent] += 1
+				if cellContent == "A" || cellContent == "B" || cellContent == "C" || cellContent == "D" {
+					data[scoord(row, col)] = cellContent + fmt.Sprint(counts[cellContent]-1)
+				} else {
+					data[scoord(row, col)] = cellContent
+				}
+			}
+		}
+	}
+	return data
+}
+
+type Move struct {
+	// this is  a pair of coordinates. We move object from cell row,col to cell row,col
+	// a trial is a list of these
+	from string
+	to   string
+}
+
+type Tableau struct {
+	board map[string]string
+}
+
+func (t *Tableau) init(aString string) {
+	t.board = parseData(aString)
+}
+
+// func (t Tableau) doMoves(moves []Move) {
+// 	cost := 0
+// 	for _, k := range moves {
+// 		cost += t.moveAmphipod(k)
+// 	}
+// }
+
+func (t Tableau) wins() bool {
+	return string(t.board["2,3"][0])+string(t.board["3,3"][0]) == "AA" &&
+		string(t.board["2,5"][0])+string(t.board["3,5"][0]) == "BB" &&
+		string(t.board["2,7"][0])+string(t.board["3,7"][0]) == "CC" &&
+		string(t.board["2,9"][0])+string(t.board["3,9"][0]) == "DD"
+}
+
+func (t Tableau) evaluate() string {
+
+	if t.wins() {
+		return "wins"
+	} else {
+		return "no moves"
+	}
+}
+
+func (t Tableau) isDone(coord string) bool {
+	home := t.homecells((t.board[coord]))
+
+	// row, col := rowcol(coord)
+
+	if coord == home[1] {
+		// we're in the bottom slot
+		return true
+	}
+	// // TODO: check more on this, maybe
+	// if coord == home[0] {
+	// 	// we're in the top slot
+	// 	return true
+	// }
+
+	// we're in the top slot && the left char of the critter in the bottom slot matches mine
+	if coord == home[0] && t.board[home[1]][0] == t.board[coord][0] {
+		return true
+	}
+	return false
+}
+
+func (t Tableau) homecells(amphipod string) []string {
+	tst := string(amphipod[0])
+
+	if tst == "A" {
+		return []string{"2,3", "3,3"}
+	}
+	if tst == "B" {
+		return []string{"2,5", "3,5"}
+	}
+	if tst == "C" {
+		return []string{"2,7", "3,7"}
+	}
+	if tst == "D" {
+		return []string{"2,9", "3,9"}
+	}
+
+	return []string{}
+}
+
+func (t Tableau) minPathCost(coord1 string, coord2 string) int {
+	//  return 0 if we cannot get there from here, but we
+	//  use math.MaxInt internallybecause it it big
+
+	tmp := map[string]int{}
+
+	row, col := rowcol(coord1)
+
+	neighbors := []Coordinate{
+		{currentNode.x, currentNode.y + 1},
+		{currentNode.x, currentNode.y - 1},
+		{currentNode.x + 1, currentNode.y},
+		{currentNode.x - 1, currentNode.y}}
+
+}
+
+func (t Tableau) availableHomeCell(coord string) string {
+	amphipod := t.board[coord]
+	atype := amphipod[0]
+	homes := t.homecells(amphipod)
+	// there are only two cells. It's OK if the one in the bottom cell
+	// has the same type and the top one is empty
+	topCell := homes[0]
+	bottomCell := homes[1]
+	if t.board[bottomCell][0] == atype && t.board[topCell] == "." {
+		return topCell
+	}
+	// or if they are both empty
+	if t.board[topCell] == "." && t.board[bottomCell] == "." {
+		return bottomCell
+	}
+	return ""
+}
+
+func (t Tableau) enumeratePossibleNextMoves() []Move {
+	moves := []Move{}
+	for _, k := range t.allAmphipods() {
+		if !t.isDone(k) {
+			h := t.mayMoveHomeTo(k)
+			if len(h) > 0 {
+				moves = append(moves, Move{k, h})
+			}
+			for _, x := range t.hallMoves(k) {
+				moves = append(moves, Move{k, x})
+			}
+		}
+	}
+	return moves
+}
+
+func (t Tableau) hallPositions() map[string]bool {
+	positions := map[string]bool{}
+	for _, v := range []string{"1,1", "1,2", "1,4", "1,6", "1,8", "1,10", "1,11"} {
+		positions[v] = true
+	}
+	return positions
+}
+
+func (t Tableau) isInHall(coord string) bool {
+	return t.hallPositions()[coord]
+}
+
+// func (t Tableau) isEmpty(position string) bool {
+// 	return t.board[position] == "."
+// }
+
+// func (t Tableau) amphipodsThatMayMove() {
+// 	tl := []string{}
+
+// 	for _, key := range t.board {
+// 		// can they move at all?
+// 		if len(t.emptyNeighbors(key)) > 0 {
+// 			tl = append(tl, key)
+// 		}
+// 	}
+// }
+
+func (t Tableau) mayMoveHomeTo(coord string) string {
+	// amphipodType := t.board[coord][0]
+	// must be in a hall position to go home
+	if !t.isInHall(coord) {
+		return ""
+	}
+
+	s := t.availableHomeCell(coord)
+	// make sure there is a path. only have to deal with horizontal here
+	if len(s) > 0 {
+		row, scol := rowcol(coord)
+		_, dcol := rowcol(s)
+		if scol < dcol {
+			for col := scol + 1; col <= dcol; col++ {
+				if t.board[scoord(row, col)] != "." {
+					return ""
+				}
+			}
+		}
+		if scol > dcol {
+			for col := scol - 1; col >= dcol; col-- {
+				if t.board[scoord(row, col)] != "." {
+					return ""
+				}
+			}
+		}
+		return s
+	}
+
+	return ""
+}
+
+func (t Tableau) hallMoves(coord string) []string {
+	row, _ := rowcol(coord)
+	// gotta be in a room to go to the hall
+	if row > 1 {
+		return t.accessibleHallPlaces(coord)
+	}
+	return []string{}
+}
+
+func (t Tableau) accessibleHallPlaces(coord string) []string {
+
+	crow, ccol := rowcol(coord)
+	for row := crow; crow <= 1; row-- {
+		tmp := scoord(row, ccol)
+		if t.board[tmp] != "." {
+			//can't get to the hall
+			return []string{}
+		}
+	}
+	spots := []string{}
+	// go to the right
+	for i := ccol; i < 11; i++ {
+		coords := scoord(crow, i)
+		if t.isInHall(coords) {
+			test := t.board[coords]
+			if test == "." {
+				spots = append(spots, coords)
+			} else {
+				break
+			}
+		}
+	}
+	// go to the left
+	for i := ccol; i > 0; i-- {
+		coords := scoord(crow, i)
+		if t.isInHall(coords) {
+			test := t.board[coords]
+			if test == "." {
+				spots = append(spots, coords)
+			} else {
+				break
+			}
+		}
+	}
+
+	return spots
+}
+
+func costPerCell(a string) int {
+	if string(a[0]) == "A" {
+		return 1
+	}
+	if string(a[0]) == "B" {
+		return 10
+	}
+	if string(a[0]) == "C" {
+		return 100
+	}
+	if string(a[0]) == "D" {
+		return 1000
+	}
+	return 0
+}
+
+func (t Tableau) moveAmphipod(move Move) int {
+
+	tox, toy := rowcol(move.to)
+
+	xcells := tox - toy
+	if xcells < 0 {
+		xcells = -xcells
+	}
+
+	fx, fy := rowcol(move.from)
+
+	ycells := fx - fy
+	if ycells < 0 {
+		ycells = -ycells
+	}
+
+	amphipod := t.board[move.from]
+	cost := (ycells + xcells) * costPerCell(amphipod)
+	t.board[move.to] = t.board[move.from]
+	return cost
+}
+
+func (t Tableau) allAmphipods() []string {
+	a := []string{}
+	for key, v := range t.board {
+		if len(v) > 1 {
+			a = append(a, key)
+		}
+	}
+	return a
+}
+
+func rowcol(coord string) (int, int) {
+	var row, col int
+	fmt.Sscanf(coord, "%d,%d", &row, &col)
+	return row, col
+}
+
+func scoord(row int, col int) string {
+	return fmt.Sprintf("%d,%d", row, col)
+}
+
+// func (t Tableau) emptyNeighbors(coord string) []string {
+// 	row, col := rowcol(coord)
+// 	coords := []string{
+// 		scoord(row, col+1),
+// 		scoord(row, col-1),
+// 		scoord(row-1, col),
+// 		scoord(row+1, col)}
+// 	neighbors := []string{}
+// 	for _, k := range coords {
+// 		if t.board[k] == "." {
+// 			neighbors = append(neighbors, k)
+// 		}
+// 	}
+// 	return neighbors
+// }
+
+type Trial struct {
+	cost    int
+	tableau Tableau
+	result  string
+}
+
+func doAllMoves(aString string) int {
+	// initData := parseData(aString)
+	// bootstrap
+	tries := []Trial{}
+	tableau := Tableau{}
+	tableau.init(aString)
+	tries = append(tries, Trial{tableau: tableau})
+	winners := []Trial{}
+
+	// loop. for each try, get a list of possible next moves.
+	for len(tries) > 0 {
+		newList := []Trial{}
+		for _, trial := range tries {
+			moves := trial.tableau.enumeratePossibleNextMoves()
+			if len(moves) == 0 {
+				trial.result = tableau.evaluate()
+				if trial.result == "win" {
+					winners = append(winners, trial)
+				}
+			} else {
+				// now, make a new trial for each possible move, starting with current state
+				for _, v := range moves {
+					// copy the tableau board here.
+					newMap := map[string]string{}
+					for k, val := range tableau.board {
+						newMap[k] = val
+					}
+					newTableau := Tableau{board: newMap}
+					trial.cost += newTableau.moveAmphipod(v)
+					newList = append(newList, Trial{cost: trial.cost, tableau: newTableau})
+				}
+			}
+			tries = newList
+		}
+	}
+
+	min := math.MaxInt
+	for _, val := range winners {
+		if val.cost < min {
+			min = val.cost
+		}
+
+	}
+	return min
+}

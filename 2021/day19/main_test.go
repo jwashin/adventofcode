@@ -22,8 +22,10 @@ func Test_parseData(t *testing.T) {
 		--- scanner 1 ---
 		-1,-1
 		-5,0
-		-2,1`}, []Scanner{{0, []Vector{{0, 2, 0}, {4, 1, 0}, {3, 3, 0}}}, {1, []Vector{{-1, -1, 0}, {-5, 0, 0}, {-2, 1, 0}}}}},
-	}
+		-2,1`}, []Scanner{
+			{0, []Vector{{0, 2, 0}, {4, 1, 0}, {3, 3, 0}}, Vector{0, 0, 0}, 0},
+			{1, []Vector{{-1, -1, 0}, {-5, 0, 0}, {-2, 1, 0}}, Vector{0, 0, 0}, 0}},
+		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := parseData(tt.args.aString); !reflect.DeepEqual(got, tt.want) {

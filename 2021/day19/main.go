@@ -19,6 +19,18 @@ type Scanner struct {
 	orientation int
 }
 
+func scannerDistances(s Scanner) []int {
+	out := []int{}
+	for key1, value1 := range s.beacons {
+		for key2, value2 := range s.beacons {
+			if key2 > key1 {
+				out = append(out, manhattanDistance(value1, value2))
+			}
+		}
+	}
+	return out
+}
+
 func manhattanDistance(a Vector, b Vector) int {
 	return abs(a.x-b.x) + abs(a.y-b.y) + abs(a.z-b.z)
 }

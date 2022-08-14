@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -40,9 +40,9 @@ func (d *Die) roll() uint64 {
 }
 
 func main() {
-	data, _ := ioutil.ReadFile("input.txt")
+	data, _ := os.ReadFile("input.txt")
 	fmt.Println(start(string(data), 1000))
-	fmt.Println(dirac(string(data), 21))
+	// fmt.Println(dirac(string(data), 21))
 }
 
 func start(aString string, winningScore uint64) uint64 {
@@ -214,9 +214,9 @@ func playDirac(players []*Player, winningScore uint64) uint64 {
 	return wins[2]
 }
 
-func areWeDone(p1 map[string]uint64, p2 map[string]uint64) bool {
-	return allWinners(p1) && allWinners(p2)
-}
+// func areWeDone(p1 map[string]uint64, p2 map[string]uint64) bool {
+// 	return allWinners(p1) && allWinners(p2)
+// }
 
 func allWinners(p1 map[string]uint64) bool {
 	for k := range p1 {

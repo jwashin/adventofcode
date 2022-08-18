@@ -18,12 +18,12 @@ import (
 func Test_start(t *testing.T) {
 	type args struct {
 		aString      string
-		winningScore uint64
+		winningScore int
 	}
 	tests := []struct {
 		name string
 		args args
-		want uint64
+		want int
 	}{
 		{"1", args{`Player 1 starting position: 4
 		Player 2 starting position: 8`, 1000}, 739785},
@@ -39,13 +39,13 @@ func Test_start(t *testing.T) {
 
 func Test_clock10Add(t *testing.T) {
 	type args struct {
-		start uint64
-		anInt uint64
+		start int
+		anInt int
 	}
 	tests := []struct {
 		name string
 		args args
-		want uint64
+		want int
 	}{
 		{"1", args{1, 1}, 2},
 		{"2", args{10, 1}, 1},
@@ -64,12 +64,12 @@ func Test_clock10Add(t *testing.T) {
 func Test_dirac(t *testing.T) {
 	type args struct {
 		aString      string
-		winningScore uint64
+		winningScore int
 	}
 	tests := []struct {
 		name string
 		args args
-		want uint64
+		want int
 	}{
 		{"1", args{`Player 1 starting position: 4
 Player 2 starting position: 8`, 21}, 444356092776315},

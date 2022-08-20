@@ -20,7 +20,22 @@ func main() {
 		}
 	}
 	fmt.Printf("1: %v\n", triangleCount)
-
+	part2Count := 0
+	newList := [][]string{}
+	for _, v := range parsed {
+		p2 := parse(v)
+		newList = append(newList, p2)
+		if len(newList) < 3 {
+			continue
+		}
+		for _, y := range []int{0, 1, 2} {
+			if possibleTriangle(newList[0][y], newList[1][y], newList[2][y]) {
+				part2Count += 1
+			}
+		}
+		newList = [][]string{}
+	}
+	fmt.Printf("2: %v\n", part2Count)
 }
 
 func parse(a string) []string {

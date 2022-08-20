@@ -75,3 +75,27 @@ UUUUD`}, "1985"},
 		})
 	}
 }
+
+func Test_allCodes2(t *testing.T) {
+	type args struct {
+		start string
+		data  string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"1", args{start: "5", data: `ULL
+RRDDD
+LURDL
+UUUUD`}, "5DB3"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := allCodes2(tt.args.start, tt.args.data); got != tt.want {
+				t.Errorf("allCodes2() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -3,11 +3,14 @@ package main
 import (
 	"crypto/md5"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 func main() {
 	input := "cxdnnyjw"
-	fmt.Println(findPassword(input))
+	fmt.Println("1. " + findPassword(input))
+	fmt.Println("2. " + findPassword2(input))
 }
 
 func hash(s string) string {
@@ -29,15 +32,27 @@ func findPassword(doorId string) string {
 	return password
 }
 func findPassword2(doorId string) string {
-	password := ""
 	idx := 0
-	for len(password) < 8 {
+	password := []string{"_", "_", "_", "_", "_", "_", "_", "_"}
+	out := "_"
+	for strings.Contains(out, "_") {
 		idx += 1
 		t := hash(doorId + fmt.Sprint(idx))
 		if t[:5] == "00000" {
-			password += string(t[5])
-			fmt.Println(password)
+			pos := string(t[5])
+			position, _ := strconv.ParseInt("0x"+pos, 0, 64)
+			if position >= 0 && position <= 7 {
+				if password[position] == "_" {
+					password[position] = string(t[6])
+					out = catPass(password)
+					fmt.Println(out)
+				}
+			}
 		}
 	}
-	return password
+	return out
+}
+
+func catPass(a []string) string {
+	return strings.Join(a, "")
 }

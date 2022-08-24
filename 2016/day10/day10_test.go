@@ -105,7 +105,7 @@ func Test_doInstructions(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string
+		want int
 	}{
 		{"1", args{map[string]*Bot{
 			"bot 2":    {purse: []int{5, 2}, lowDest: "bot 1", highDest: "bot 0"},
@@ -113,7 +113,7 @@ func Test_doInstructions(t *testing.T) {
 			"bot 1":    {purse: []int{3}, lowDest: "output 1", highDest: "bot 0"},
 			"output 2": {purse: []int{}, lowDest: "", highDest: ""},
 			"output 0": {purse: []int{}, lowDest: "", highDest: ""},
-			"bot 0":    {purse: []int{}, lowDest: "output 2", highDest: "output 0"}}}, "Done"},
+			"bot 0":    {purse: []int{}, lowDest: "output 2", highDest: "output 0"}}}, 1234},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

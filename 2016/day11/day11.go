@@ -1,17 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/bits"
 	"sort"
 	"strings"
 )
 
+func main() {
+	fmt.Println(doGame(true))
+}
+
 func getData(test bool) []string {
 	if test {
 		return []string{"E,HM,LM\nHG\nLG\n"}
 	}
-	return []string{"PG,TG,TM,XG,RG,RM,CG,CM\nPM,XM\n\n"}
+	return []string{"E,PG,TG,TM,XG,RG,RM,CG,CM\nPM,XM\n\n"}
 }
 
 func contains(ls []string, s string) bool {
@@ -44,7 +49,7 @@ func addItems(f string, r []string) string {
 	return strings.Join(s, ",")
 }
 
-func doGame(test bool) {
+func doGame(test bool) int {
 	data := getData(true)
 	s := makeTableau(data)
 	unvisited := map[string]int{s: 0}
@@ -67,18 +72,23 @@ func doGame(test bool) {
 		// item is a string. enumerate next possible moves
 		floors := fromTableau(currentItem)
 		floorIdx := currentFloor(floors)
-		floorItems := strings.Split(floors[floorIdx], ",")
+		floorItemsx := strings.Split(floors[floorIdx], ",")
+		floorItems := []string{}
+		for _, v := range floorItemsx {
+			if v != "E" {
+				floorItems = append(floorItems, v)
+			}
+		}
 		toAdd := [][]string{}
 		for _, v := range floorItems {
-			if v != "E" {
-				toAdd = append(toAdd, []string{v})
-			}
+			toAdd = append(toAdd, []string{v})
 		}
 		doubles := Combinations2(floorItems, 2)
 		toAdd = append(toAdd, doubles...)
 
 		possibleNewTableaux := []string{}
 		newFloor := floors[floorIdx]
+		newFloor = removeItems(newFloor, []string{"E"})
 		for _, item := range toAdd {
 			floorT := removeItems(newFloor, item)
 			if isSafeFloor(floorT) {
@@ -98,7 +108,9 @@ func doGame(test bool) {
 							newTableau = append(newTableau, v)
 						}
 						nt := normalize(strings.Join(newTableau, "\n"))
-						if nt == "E,HG,HM,LG,LM\n\n\n"
+						if nt == "\n\n\nE,HG,HM,LG,LM" {
+							return currentSolution + 1
+						}
 						possibleNewTableaux = append(possibleNewTableaux, nt)
 					}
 				}
@@ -121,7 +133,7 @@ func doGame(test bool) {
 		}
 
 	}
-
+	return 0
 }
 
 func possibleFloors(currFloor int) []int {

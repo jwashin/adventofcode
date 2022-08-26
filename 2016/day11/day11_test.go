@@ -45,3 +45,27 @@ func TestCombinations2(t *testing.T) {
 		})
 	}
 }
+
+func Test_isSafeFloor(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"0", args{"PG,RG,RM,WG,WM,XG"}, true},
+		{"1", args{"E,HG,LG,LM"}, true},
+		{"2", args{"E,HG,LG"}, true},
+		{"3", args{"LM"}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isSafeFloor(tt.args.s); got != tt.want {
+				t.Errorf("isSafeFloor() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

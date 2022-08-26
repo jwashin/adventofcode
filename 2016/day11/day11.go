@@ -24,14 +24,22 @@ func Reverse[S ~[]E, E any](s S) {
 }
 
 func main() {
-	fmt.Println(doGame(true))
+	fmt.Println(doGame(false))
 }
 
-func getData(test bool) []string {
+func getData(test bool) string {
 	if test {
-		return []string{"E,HM,LM\nHG\nLG\n"}
+		return "E,HM,LM\nHG\nLG\n"
 	}
-	return []string{"E,PG,TG,TM,XG,RG,RM,CG,CM\nPM,XM\n\n"}
+	// return "E,PG,TG,TM,XG,RG,RM,WG,WM\nPM,XM\n\n"
+	return "E,PG,TG,TM,XG,RG,RM,WG,WM,YG,YM,ZG,ZM\nPM,XM\n\n"
+}
+
+func getSolution(test bool) string {
+	if test {
+		return normalize("\n\n\nE,HM,LM,HG,LG")
+	}
+	return normalize("\n\n\nE,PG,TG,TM,XG,RG,RM,WG,WM,PM,XM")
 }
 
 func contains(ls []string, s string) bool {
@@ -72,24 +80,30 @@ func addItems(f string, r []string) string {
 
 func doGame(test bool) int {
 	data := getData(test)
-	s := makeTableau(data)
-	unvisited := map[string]int{s: 0}
-	prev := map[string]string{}
-	currentSolution := 0
-	for len(unvisited) > 0 {
+	solution := getSolution(test)
+	s := normalize(data)
+	used := []string{}
+	currentSolution := math.MaxInt
+	// initialize the graph
+	// string is the string representation of any item in the graph
+	graph := Graph{vertices: map[string]*Vertex{s: {dist: 0, prev: ""}}}
+	q := graph.vertices
+	for len(q) > 0 {
+		fmt.Println(currentSolution, len(q), len(used))
 		// find min solution so far in unvisited
 		min := math.MaxInt
 		currentItem := ""
 		// currentSolution := math.MaxInt
-		for k, v := range unvisited {
-			if v < min {
-				min = v
-				currentItem = k
+		for itemRepresentation, v := range q {
+			if v.dist < min {
+				min = v.dist
+				currentItem = itemRepresentation
 			}
 		}
 		// remove currentItem
 		currentSolution = min
-		delete(unvisited, currentItem)
+		delete(q, currentItem)
+		used = append(used, currentItem)
 		// fmt.Println(currentSolution, currentItem)
 		// debugprint(currentSolution, currentItem)
 
@@ -112,7 +126,7 @@ func doGame(test bool) int {
 		}
 		doubles := Combinations2(floorItems, 2)
 		toAdd = append(toAdd, doubles...)
-		possibleNewTableaux := []string{}
+		neighborRepresentations := []string{}
 		newFloor := floors[floorIdx]
 		for _, item := range toAdd {
 			floorT := removeItems(newFloor, item)
@@ -135,38 +149,33 @@ func doGame(test bool) int {
 							newTableau = append(newTableau, v)
 						}
 						nt := normalize(strings.Join(newTableau, "\n"))
-
-						if nt == "\n\n\nE,HG,HM,LG,LM" {
-							debugprint(currentSolution, nt)
-							return currentSolution + 1
-						}
-						possibleNewTableaux = append(possibleNewTableaux, nt)
+						neighborRepresentations = append(neighborRepresentations, nt)
 					}
 				}
 
 			}
 		}
-		for _, newItem := range possibleNewTableaux {
-			if unvisited[newItem] == 0 {
-				if prev[newItem] == "" {
-					unvisited[newItem] = currentSolution + 1
+		for _, nextState := range neighborRepresentations {
+			// replacement for "still in q"
+			previouslyVisited := false
+			for _, v := range used {
+				if v == nextState {
+					previouslyVisited = true
+					break
 				}
-				prev[newItem] = currentItem
+			}
+			if previouslyVisited {
 				continue
 			}
-			if unvisited[newItem] > 0 {
-				if currentSolution+1 < unvisited[newItem] {
-					if prev[newItem] == "" {
-						unvisited[newItem] = currentSolution + 1
-					}
-					prev[newItem] = currentItem
-				}
+			newVertex := Vertex{prev: currentItem, dist: currentSolution + 1}
+			q[nextState] = &newVertex
+			if nextState == solution {
+				return currentSolution + 1
 			}
 
 		}
 
 	}
-
 	return currentSolution
 }
 
@@ -218,14 +227,14 @@ func sortFloor(s string) string {
 	return s
 }
 
-func makeTableau(data []string) string {
-	out := []string{}
-	for _, row := range data {
-		sp := sortFloor(row)
-		out = append(out, sp)
-	}
-	return strings.Join(out, "\n")
-}
+// func makeTableau(data []string) string {
+// 	out := []string{}
+// 	for _, row := range data {
+// 		sp := sortFloor(row)
+// 		out = append(out, sp)
+// 	}
+// 	return strings.Join(out, "\n")
+// }
 
 func normalize(tableau string) string {
 	t := []string{}
@@ -241,20 +250,30 @@ func fromTableau(s string) []string {
 
 func isSafeFloor(s string) bool {
 	t := strings.Split(s, ",")
-	for _, m := range t {
-		if len(m) < 2 {
-			continue
-		}
-		for _, g := range t {
-			if len(g) < 2 {
-				continue
-			}
-			if string(m[1]) == "M" && string(g[1]) == "G" && string(m[0]) != string(g[0]) {
-				return false
-			}
-
+	// collect the generators
+	generators := ""
+	for _, item := range t {
+		if len(item) == 2 && string(item[1]) == "G" {
+			generators += string(item[0])
 		}
 	}
+	if len(generators) == 0 {
+		return true
+	}
+	// collect the microchips.
+	chips := ""
+	for _, item := range t {
+		if len(item) == 2 && string(item[1]) == "M" {
+			chips += string(item[0])
+		}
+	}
+
+	for _, item := range chips {
+		if !strings.Contains(generators, string(item)) {
+			return false
+		}
+	}
+
 	return true
 }
 

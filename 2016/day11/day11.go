@@ -8,6 +8,25 @@ import (
 	"strings"
 )
 
+// https://www.sohamkamani.com/golang/sets/
+type vertexSet map[string]struct{}
+
+// Adds an item to the set
+func (s vertexSet) add(vertex string) {
+	s[vertex] = struct{}{}
+}
+
+// // Removes an item from the set
+// func (s vertexSet) remove(vertex string) {
+// 	delete(s, vertex)
+// }
+
+// Returns a boolean value describing if the item exists in the set
+func (s vertexSet) has(vertex string) bool {
+	_, ok := s[vertex]
+	return ok
+}
+
 type Graph struct {
 	vertices map[string]*Vertex
 }
@@ -39,7 +58,7 @@ func getSolution(test bool) string {
 	if test {
 		return normalize("\n\n\nE,HM,LM,HG,LG")
 	}
-	return normalize("\n\n\nE,PG,TG,TM,XG,RG,RM,WG,WM,PM,XM")
+	return normalize("\n\n\nE,PG,TG,TM,XG,RG,RM,WG,WM,PM,XM,YG,YM,ZG,ZM")
 }
 
 func contains(ls []string, s string) bool {
@@ -82,7 +101,7 @@ func doGame(test bool) int {
 	data := getData(test)
 	solution := getSolution(test)
 	s := normalize(data)
-	used := []string{}
+	used := vertexSet{}
 	currentSolution := math.MaxInt
 	// initialize the graph
 	// string is the string representation of any item in the graph
@@ -103,7 +122,8 @@ func doGame(test bool) int {
 		// remove currentItem
 		currentSolution = min
 		delete(q, currentItem)
-		used = append(used, currentItem)
+		used.add(currentItem)
+		// used = append(used, currentItem)
 		// fmt.Println(currentSolution, currentItem)
 		// debugprint(currentSolution, currentItem)
 
@@ -157,13 +177,8 @@ func doGame(test bool) int {
 		}
 		for _, nextState := range neighborRepresentations {
 			// replacement for "still in q"
-			previouslyVisited := false
-			for _, v := range used {
-				if v == nextState {
-					previouslyVisited = true
-					break
-				}
-			}
+			// previouslyVisited := false
+			previouslyVisited := used.has(nextState)
 			if previouslyVisited {
 				continue
 			}
@@ -179,27 +194,19 @@ func doGame(test bool) int {
 	return currentSolution
 }
 
-func debugprint(score int, outd string) {
-	fmt.Println(score)
-	out := strings.Split(outd, "\n")
-	Reverse(out)
-	for _, v := range out {
-		fmt.Println(v)
-	}
-}
+// func debugprint(score int, outd string) {
+// 	fmt.Println(score)
+// 	out := strings.Split(outd, "\n")
+// 	Reverse(out)
+// 	for _, v := range out {
+// 		fmt.Println(v)
+// 	}
+// }
 
 func possibleFloors(currFloor int) []int {
-	if currFloor == 0 {
-		return []int{1}
-	}
-	if currFloor == 2 {
-		return []int{1, 3}
-	}
-	if currFloor == 1 {
-		return []int{0, 2}
-	}
-	// 3
-	return []int{2}
+
+	t := [][]int{{1}, {0, 2}, {1, 3}, {2}}
+	return t[currFloor]
 
 }
 

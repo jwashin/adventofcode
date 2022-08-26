@@ -8,6 +8,21 @@ import (
 	"strings"
 )
 
+type Graph struct {
+	vertices map[string]*Vertex
+}
+
+type Vertex struct {
+	dist int
+	prev string
+}
+
+func Reverse[S ~[]E, E any](s S) {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+}
+
 func main() {
 	fmt.Println(doGame(true))
 }
@@ -40,20 +55,27 @@ func removeItems(f string, r []string) string {
 }
 
 func addItems(f string, r []string) string {
-	s := strings.Split(f, ",")
+	s := []string{f}
+	if strings.Contains(f, ",") {
+		s = strings.Split(f, ",")
+	}
 	for _, v := range r {
 		if !contains(s, v) {
 			s = append(s, v)
 		}
 	}
-	return strings.Join(s, ",")
+	if len(s) > 1 {
+		return strings.Join(s, ",")
+	}
+	return s[0]
 }
 
 func doGame(test bool) int {
-	data := getData(true)
+	data := getData(test)
 	s := makeTableau(data)
 	unvisited := map[string]int{s: 0}
 	prev := map[string]string{}
+	currentSolution := 0
 	for len(unvisited) > 0 {
 		// find min solution so far in unvisited
 		min := math.MaxInt
@@ -66,29 +88,32 @@ func doGame(test bool) int {
 			}
 		}
 		// remove currentItem
-		currentSolution := min
+		currentSolution = min
 		delete(unvisited, currentItem)
+		// fmt.Println(currentSolution, currentItem)
+		// debugprint(currentSolution, currentItem)
 
 		// item is a string. enumerate next possible moves
 		floors := fromTableau(currentItem)
+		// get the one with the elevator
 		floorIdx := currentFloor(floors)
 		floorItemsx := strings.Split(floors[floorIdx], ",")
 		floorItems := []string{}
 		for _, v := range floorItemsx {
-			if v != "E" {
+			if v != "E" && v != "" {
 				floorItems = append(floorItems, v)
 			}
 		}
+		// pull out the elevator for now
+		floors[floorIdx] = strings.Join(floorItems, ",")
 		toAdd := [][]string{}
 		for _, v := range floorItems {
 			toAdd = append(toAdd, []string{v})
 		}
 		doubles := Combinations2(floorItems, 2)
 		toAdd = append(toAdd, doubles...)
-
 		possibleNewTableaux := []string{}
 		newFloor := floors[floorIdx]
-		newFloor = removeItems(newFloor, []string{"E"})
 		for _, item := range toAdd {
 			floorT := removeItems(newFloor, item)
 			if isSafeFloor(floorT) {
@@ -98,7 +123,9 @@ func doGame(test bool) int {
 						newTableau := []string{}
 						for kx, v := range floors {
 							if kx == ix {
-								newTableau = append(newTableau, "E,"+floorx)
+								// put the elevator back on the destination floor
+								floorx := addItems(floorx, []string{"E"})
+								newTableau = append(newTableau, floorx)
 								continue
 							}
 							if kx == floorIdx {
@@ -108,7 +135,9 @@ func doGame(test bool) int {
 							newTableau = append(newTableau, v)
 						}
 						nt := normalize(strings.Join(newTableau, "\n"))
+
 						if nt == "\n\n\nE,HG,HM,LG,LM" {
+							debugprint(currentSolution, nt)
 							return currentSolution + 1
 						}
 						possibleNewTableaux = append(possibleNewTableaux, nt)
@@ -117,23 +146,37 @@ func doGame(test bool) int {
 
 			}
 		}
-		for _, item := range possibleNewTableaux {
-			if unvisited[item] == 0 {
-				unvisited[item] = currentSolution + 1
-				prev[item] = currentItem
+		for _, newItem := range possibleNewTableaux {
+			if unvisited[newItem] == 0 {
+				if prev[newItem] == "" {
+					unvisited[newItem] = currentSolution + 1
+				}
+				prev[newItem] = currentItem
 				continue
 			}
-			if unvisited[item] > 0 {
-				if currentSolution+1 < unvisited[item] {
-					unvisited[item] = currentSolution + 1
-					prev[item] = currentItem
+			if unvisited[newItem] > 0 {
+				if currentSolution+1 < unvisited[newItem] {
+					if prev[newItem] == "" {
+						unvisited[newItem] = currentSolution + 1
+					}
+					prev[newItem] = currentItem
 				}
 			}
 
 		}
 
 	}
-	return 0
+
+	return currentSolution
+}
+
+func debugprint(score int, outd string) {
+	fmt.Println(score)
+	out := strings.Split(outd, "\n")
+	Reverse(out)
+	for _, v := range out {
+		fmt.Println(v)
+	}
 }
 
 func possibleFloors(currFloor int) []int {
@@ -157,23 +200,29 @@ func currentFloor(s []string) int {
 			return k
 		}
 	}
-	return 0
+	return 40
 }
 
 func sortFloor(s string) string {
-	t := strings.Split(s, ",")
-	sort.Strings(t)
-	return strings.Join(t, ",")
+	if strings.Contains(s, ",") {
+		t := strings.Split(s, ",")
+		sort.Strings(t)
+		nf := []string{}
+		for _, v := range t {
+			if len(v) > 0 {
+				nf = append(nf, v)
+			}
+		}
+		return strings.Join(nf, ",")
+	}
+	return s
 }
 
 func makeTableau(data []string) string {
 	out := []string{}
 	for _, row := range data {
-		sp := strings.Split(row, ",")
-		sort.Slice(sp, func(i, j int) bool {
-			return sp[i] < sp[j]
-		})
-		out = append(out, strings.Join(sp, ","))
+		sp := sortFloor(row)
+		out = append(out, sp)
 	}
 	return strings.Join(out, "\n")
 }

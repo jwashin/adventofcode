@@ -107,8 +107,9 @@ func doGame(test bool) int {
 	// string is the string representation of any item in the graph
 	graph := Graph{vertices: map[string]*Vertex{s: {dist: 0, prev: ""}}}
 	q := graph.vertices
+	oldc := 0
 	for len(q) > 0 {
-		fmt.Println(currentSolution, len(q), len(used))
+		// fmt.Println(currentSolution, len(q), len(used))
 		// find min solution so far in unvisited
 		min := math.MaxInt
 		currentItem := ""
@@ -121,6 +122,10 @@ func doGame(test bool) int {
 		}
 		// remove currentItem
 		currentSolution = min
+		if oldc != currentSolution {
+			fmt.Println(currentSolution, len(q), len(used))
+			oldc = currentSolution
+		}
 		delete(q, currentItem)
 		used.add(currentItem)
 		// used = append(used, currentItem)
@@ -178,8 +183,7 @@ func doGame(test bool) int {
 		for _, nextState := range neighborRepresentations {
 			// replacement for "still in q"
 			// previouslyVisited := false
-			previouslyVisited := used.has(nextState)
-			if previouslyVisited {
+			if used.has(nextState) {
 				continue
 			}
 			newVertex := Vertex{prev: currentItem, dist: currentSolution + 1}

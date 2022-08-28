@@ -73,8 +73,6 @@ func isaSpace(x, y int, factor int) bool {
 
 func closerThan50(startx, starty, factor int) int {
 	count := 0
-
-	// fmt.Print(x)
 	for y := 0; y < 51; y++ {
 		for x := 0; x < 51; x++ {
 			if isaSpace(x, y, factor) {

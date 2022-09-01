@@ -103,3 +103,24 @@ func Test_removeOne2(t *testing.T) {
 		})
 	}
 }
+
+func Test_solve_partTwo(t *testing.T) {
+	type args struct {
+		elfCount int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{"5", args{5}, 2},
+		{"final", args{3018458}, 1424135},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := solvePartTwo(tt.args.elfCount); got != tt.want {
+				t.Errorf("solve_partTwo() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/gammazero/deque"
+)
 
 type elf struct {
 	id   int
@@ -9,7 +13,7 @@ type elf struct {
 
 func main() {
 	fmt.Println("1.", winningElf(3018458))
-	fmt.Println("2.", winningElf3(3018458))
+	fmt.Println("2.", solvePartTwo(3018458))
 }
 
 func winningElf(n int) int {
@@ -78,7 +82,7 @@ func winningElf3(n int) int {
 	for len(elves) > 1 {
 		currentChooser, elves = removeOne2(currentChooser, elves)
 	}
-	return elves[0]
+	return elves[0] + 1
 }
 
 // IntSliceDelete function
@@ -110,6 +114,9 @@ func removeOne2(currentChooser int, elves []int) (int, []int) {
 // }
 
 // 26735 too low for second part
+// 2136202 too high for second part
+// 1509229 also wrong
+// correct answer was 1424135
 
 func removeOne(elves []*elf, chooserIndex int) ([]*elf, int) {
 	count := len(elves)
@@ -124,4 +131,37 @@ func removeOne(elves []*elf, chooserIndex int) ([]*elf, int) {
 		}
 	}
 	return newElves, chooserIndex
+}
+
+// @aceshades on https://www.reddit.com/r/adventofcode/comments/5j4lp1/2016_day_19_solutions/
+func solvePartTwo(elfCount int) int {
+	// py: pop from back  append to front
+	left := deque.Deque[int]{}
+	right := deque.Deque[int]{}
+	i := 0
+	for (left.Len() + right.Len()) < elfCount {
+		i += 1
+		if i < (elfCount/2)+1 {
+			left.PushFront(i)
+			continue
+		}
+		right.PushBack(i)
+	}
+	for left.Len() > 0 && right.Len() > 0 {
+		if left.Len() > right.Len() {
+			left.PopBack()
+		} else {
+			right.PopBack()
+		}
+		// rotate
+
+		right.PushBack(left.PopBack())
+		left.PushFront(right.PopFront())
+	}
+	fmt.Println(left, right)
+	if left.Len() == 1 {
+		return left.PopBack()
+	}
+	return right.PopBack()
+
 }

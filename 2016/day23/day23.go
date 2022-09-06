@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+func isNumber(s string) {
+
+}
+
 func main() {
 	data, _ := os.ReadFile("input.txt")
 	c := puter{}
@@ -14,6 +18,7 @@ func main() {
 	c.getInstructions(string(data))
 	c.run()
 	fmt.Println("1.", c.registers["a"])
+	c.getInstructions(string(data))
 	c.registers = map[string]int{"a": 12, "b": 0, "c": 0, "d": 0}
 	c.run()
 	fmt.Println("2.", c.registers["a"])
@@ -31,7 +36,12 @@ func test(s string) int {
 
 type puter struct {
 	registers map[string]int
-	program   []string
+	program   []Instruction
+}
+
+type Instruction struct {
+	name string
+	args []string
 }
 
 func (c puter) run() {
@@ -43,73 +53,97 @@ func (c puter) run() {
 
 func (c *puter) getInstructions(s string) {
 	p := strings.Split(s, "\n")
-	t := []string{}
+	t := []Instruction{}
 	for _, v := range p {
 		z := strings.TrimSpace(v)
 		if len(z) > 0 {
-			t = append(t, z)
+			x := strings.Split(z, " ")
+			i := Instruction{name: strings.TrimSpace(x[0]), args: x[1:]}
+			t = append(t, i)
 		}
 	}
+
 	c.program = t
 }
 
-func (c puter) doItem(idx int) int {
+func (c *puter) doItem(idx int) int {
 	instruction := c.program[idx]
-	ins := instruction[:3]
-	length := len(instruction)
+	ins := instruction.name
 	if ins == "tgl" {
-		opregister := string(instruction[length-1])
+		opregister := instruction.args[0]
 		affectedIndex := idx + c.registers[opregister]
 		if affectedIndex >= 0 && affectedIndex < len(c.program) {
 			opinst := c.program[affectedIndex]
-			tins := opinst[:3]
+			tins := opinst.name
 			if tins == "inc" {
-				c.program[affectedIndex] = "dec" + opinst[3:]
+				c.program[affectedIndex].name = "dec"
 			}
 			if tins == "dec" || tins == "tgl" {
-				c.program[affectedIndex] = "inc " + opinst[3:]
+				c.program[affectedIndex].name = "inc"
 			}
 			if tins == "jnz" {
-				c.program[affectedIndex] = "cpy" + opinst[3:]
+				c.program[affectedIndex].name = "cpy"
 			}
 			if tins == "cpy" {
-				c.program[affectedIndex] = "jnz" + opinst[3:]
+				c.program[affectedIndex].name = "jnz"
 			}
 		}
 	}
 
+	// if ins == "mul" {
+	// 	// TODO skip this if invalid instruction
+	// 	args := instruction.args
+	// 	dest := args[2]
+	// 	multiplicand, err := strconv.Atoi(args[0])
+	// 	if err != nil {
+	// 		return idx + 1
+	// 	}
+
+	// 	multiplier, err := strconv.Atoi(args[1])
+	// 	if err != nil {
+	// 		return idx + 1
+	// 	}
+	// 	c.registers[dest] = multiplicand * multiplier
+	// }
+
 	if ins == "inc" {
-		register := string(instruction[length-1])
+		register := instruction.args[0]
 		c.registers[register] += 1
 	}
 
 	if ins == "dec" {
-		register := string(instruction[length-1])
+		register := instruction.args[0]
 		c.registers[register] -= 1
 	}
 
 	if ins == "cpy" {
-		parsed := strings.Split(instruction, " ")
-		dest := parsed[2]
-		val, err := strconv.Atoi(parsed[1])
+		dest := instruction.args[1]
+		val, err := strconv.Atoi(instruction.args[0])
+		// first arg is not a number
 		if err != nil {
-			val = c.registers[parsed[1]]
+			val = c.registers[instruction.args[0]]
+		}
+		_, err1 := strconv.Atoi(dest)
+		// second arg is a number. invalid instruction
+		if err1 == nil {
+			return idx + 1
 		}
 		c.registers[dest] = val
 	}
 
 	if ins == "jnz" {
-		parsed := strings.Split(instruction, " ")
-		val, err := strconv.Atoi(parsed[1])
+		arg1, arg2 := instruction.args[0], instruction.args[1]
+		val, err := strconv.Atoi(arg1)
+		// first arg is not a number
 		if err != nil {
-			val = c.registers[parsed[1]]
+			val = c.registers[arg1]
 		}
 		if val != 0 {
-			y, err := strconv.Atoi(parsed[2])
+			y, err := strconv.Atoi(arg2)
 			if err == nil {
 				return idx + y
 			}
-			return idx + c.registers[parsed[2]]
+			return idx + c.registers[arg2]
 		}
 	}
 	return idx + 1

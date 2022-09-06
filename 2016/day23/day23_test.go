@@ -18,6 +18,13 @@ tgl a
 cpy 1 a
 dec a
 dec a`}, 3},
+
+		{"2", args{`cpy 41 a
+inc a
+inc a
+dec a
+jnz a 2
+dec a`}, 42},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

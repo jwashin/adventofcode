@@ -9,6 +9,14 @@ import (
 	"strings"
 )
 
+// part2
+// https://www.reddit.com/r/adventofcode/comments/5jor9q/2016_day_22_solutions/
+// @Steel_ne:
+
+// 222 too high
+// 221 too high
+// 220!
+
 type Node struct {
 	x     int
 	y     int

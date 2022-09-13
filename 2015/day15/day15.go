@@ -123,6 +123,7 @@ func countItems(elementCount int, target int) int {
 
 func next(elementCount int, target int, current []int) []int {
 
+	// first one
 	if len(current) == 0 || current == nil {
 		out := []int{0}
 		for len(out) < elementCount {

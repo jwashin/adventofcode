@@ -14,13 +14,11 @@ func main() {
 	c.getInstructions(string(data))
 	c.run()
 	fmt.Println("1.", c.registers["b"])
-	// c.getInstructions(string(data))
-	// c.registers = map[string]int{"a": 12, "b": 0, "c": 0, "d": 0}
-	// c.run()
-	// fmt.Println("2.", c.registers["a"])
+	c.getInstructions(string(data))
+	c.registers = map[string]uint{"a": 1, "b": 0}
+	c.run()
+	fmt.Println("2.", c.registers["b"])
 }
-
-// part2 6096 too low
 
 func test(s string) uint {
 	c := puter{}
@@ -42,7 +40,7 @@ type Instruction struct {
 
 func (c puter) run() {
 	inst := 0
-	for inst < len(c.program) && inst > 0 {
+	for inst <= len(c.program)-1 && inst >= 0 {
 		inst = c.doItem(inst)
 	}
 }
@@ -121,10 +119,9 @@ func (c *puter) doItem(idx int) int {
 
 		d := c.registers[register]
 
-		if !isEven(d) {
+		if d == 1 {
 			return idx + jmp
 		}
 	}
-
 	return idx + 1
 }

@@ -37,6 +37,17 @@ func maxStepsAway(data string) int {
 
 }
 
+func hexStepsAway(data string) int {
+	path := strings.Split(strings.TrimSpace(data), ",")
+	start := NewHex(0, 0)
+	newHex := NewHex(0, 0)
+	for _, v := range path {
+		newHex = HexNeighbor(newHex, getDirection(v))
+	}
+	return HexDistance(newHex, start)
+
+}
+
 // https://github.com/pmcxs/hexgrid/blob/master/hex.go
 
 type hex struct {
@@ -61,17 +72,6 @@ var directions = []hex{
 	NewHex(-1, 0),
 	NewHex(-1, +1),
 	NewHex(0, +1),
-}
-
-func hexStepsAway(data string) int {
-	path := strings.Split(strings.TrimSpace(data), ",")
-	start := NewHex(0, 0)
-	newHex := NewHex(0, 0)
-	for _, v := range path {
-		newHex = HexNeighbor(newHex, getDirection(v))
-	}
-	return HexDistance(newHex, start)
-
 }
 
 func getDirection(s string) direction {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -10,229 +9,115 @@ import (
 
 func main() {
 	fmt.Println("1.", part1())
-	fmt.Println("2.", part2())
+	fmt.Println("1.", part2())
 }
 
 func part1() int {
 	input, _ := os.ReadFile("input.txt")
-	j := sumSeverity(string(input))
-	return j
+	return severity(string(input))
 }
 
-// 156372 too low
-// 636852 too low
 func part2() int {
 	input, _ := os.ReadFile("input.txt")
-	j := calcDelay2(string(input))
-	return j
+	return calcDelay(string(input))
 }
 
 type layer struct {
-	depth            int
-	rge              int
-	scannerLoc       int
-	scannerIncrement int
+	Range     int
+	depth     int
+	scanner   int
+	direction int
 }
 
 func (j *layer) inc() {
-	loc := j.scannerLoc
-	if loc == 0 {
-		j.scannerIncrement = 1
-	}
-	if loc == j.rge-1 {
-		j.scannerIncrement = -1
-	}
-	j.scannerLoc += j.scannerIncrement
 
+	if j.scanner == j.Range-1 {
+		j.direction = -1
+	}
+	if j.scanner == 0 {
+		j.direction = 1
+	}
+	j.scanner += j.direction
 }
 
-func calcDelay2(s string) int {
-	data := strings.Split(s, "\n")
-	layers := map[int]*layer{}
-	maxLayer := 0
-	for _, v := range data {
-		j := strings.Replace(v, ":", " :#", 1)
-		d := strings.Fields(j)
-		a, _ := strconv.Atoi(d[0])
-		b, _ := strconv.Atoi(d[2])
-		l := layer{depth: a, rge: b, scannerLoc: 0, scannerIncrement: 1}
-		if a > maxLayer {
-			maxLayer = a
-		}
-		layers[a] = &l
+type firewall map[int]*layer
+
+func (f firewall) inc() {
+	for _, v := range f {
+		v.inc()
 	}
-	delay := 0
-
-	for d := 0; d < delay; d++ {
-		for _, v := range layers {
-			v.inc()
-		}
-	}
-	delayedState := layers
-	severity := 1
-	for severity > 0 {
-		severity = 0
-		// lastDelay := []
-		delay += 1
-		if delay%25000 == 0 {
-			fmt.Println(delay)
-		}
-		for _, v := range delayedState {
-			v.inc()
-		}
-		workingState := map[int]*layer{}
-		for i, k := range delayedState {
-			newLayer := layer{depth: k.depth, rge: k.rge, scannerLoc: k.scannerLoc, scannerIncrement: k.scannerIncrement}
-			workingState[i] = &newLayer
-		}
-		for jump := 0; jump <= maxLayer; jump++ {
-			found := false
-			for x := range workingState {
-				if jump == x {
-					found = true
-					break
-				}
-			}
-			if found {
-				layr := workingState[jump]
-				sLoc := layr.scannerLoc
-				if sLoc == 0 {
-					severity += layr.depth * layr.rge
-					if severity > 0 {
-						break
-					}
-				}
-			}
-			for _, v := range workingState {
-				v.inc()
-			}
-		}
-		if severity == 0 {
-			for _, v := range workingState {
-				fmt.Println(v.depth, v.rge, v.scannerLoc, v.scannerIncrement)
-			}
-		}
-
-	}
-
-	return delay
-
 }
-
-func printLayers(layers map[int]*layer) {
-	max := 0
-	for _, v := range layers {
-		if v.depth > max {
-			max = v.depth
+func (f firewall) getItem(i int) *layer {
+	for v := range f {
+		if v == i {
+			return f[i]
 		}
 	}
-	for i := 0; i < max; i++ {
-		fmt.Print(" ", i, " ")
-
-	}
-	fmt.Println()
-
+	layer := layer{scanner: 1}
+	return &layer
 }
 
 func calcDelay(s string) int {
-	data := strings.Split(s, "\n")
-	severity := math.MaxInt
-	layers := map[int]*layer{}
-	maxLayer := 0
-	for _, v := range data {
-		j := strings.Replace(v, ":", " :#", 1)
-		d := strings.Fields(j)
-		a, _ := strconv.Atoi(d[0])
-		b, _ := strconv.Atoi(d[2])
-		l := layer{depth: a, rge: b, scannerLoc: 0, scannerIncrement: 1}
-		if a > maxLayer {
-			maxLayer = a
+	f := firewall{}
+	max := 0
+	for _, k := range strings.Split(s, "\n") {
+		k = strings.Replace(k, ":", " :#", 1)
+		d := strings.Fields(k)
+		depth, _ := strconv.Atoi(d[0])
+		Range, _ := strconv.Atoi(d[2])
+		item := layer{depth: depth, Range: Range, scanner: 0, direction: 1}
+		f[depth] = &item
+		if depth > max {
+			max = depth
 		}
-		layers[a] = &l
 	}
+	severity := 1
 	delay := 0
 	for severity > 0 {
 		severity = 0
-		layer := 0
-		for layer <= maxLayer {
-			found := false
-			for x := range layers {
-				if layer == x {
-					found = true
-					break
-				}
-			}
-			if found {
-				layr := layers[layer]
-				sLoc := layr.scannerLoc
-				if sLoc == 0 {
-					severity += layr.depth * layr.rge
-				}
-			}
-			layer += 1
-		}
-		for _, v := range layers {
-			v.inc()
-		}
 		delay += 1
-	}
-	return delay - 1
-}
-
-func scannerLocation(time int, rge int) int {
-	n := 0
-	loc := 0
-	inc := -1
-	for n < time {
-		if loc == rge-1 || loc == 0 {
-			inc = -inc
+		if delay%10000 == 0 {
+			fmt.Println(delay)
 		}
-		loc += inc
-		n += 1
+		f.inc()
+		w := firewall{}
+		for k, v := range f {
+			lyr := layer{depth: v.depth, direction: v.direction, Range: v.Range, scanner: v.scanner}
+			w[k] = &lyr
+		}
+		for i := 0; i <= max; i++ {
+			layr := w.getItem(i)
+			if layr.scanner == 0 {
+				severity = 1
+				break
+			}
+			w.inc()
+		}
 	}
-	return loc
+	return delay
 }
 
-func sumSeverity(s string) int {
-	data := strings.Split(s, "\n")
+func severity(s string) int {
+	f := firewall{}
+	max := 0
+	for _, k := range strings.Split(s, "\n") {
+		k = strings.Replace(k, ":", " :#", 1)
+		d := strings.Fields(k)
+		depth, _ := strconv.Atoi(d[0])
+		Range, _ := strconv.Atoi(d[2])
+		item := layer{depth: depth, Range: Range, scanner: 0, direction: 1}
+		f[depth] = &item
+		if depth > max {
+			max = depth
+		}
+	}
 	severity := 0
-	layers := map[int]layer{}
-	maxLayer := 0
-	for _, v := range data {
-		j := strings.Replace(v, ":", " :#", 1)
-		d := strings.Fields(j)
-		a, _ := strconv.Atoi(d[0])
-		b, _ := strconv.Atoi(d[2])
-		l := layer{depth: a, rge: b}
-		if a > maxLayer {
-			maxLayer = a
+	for i := 0; i <= max; i++ {
+		layr := f.getItem(i)
+		if layr.scanner == 0 {
+			severity += layr.depth * layr.Range
 		}
-		layers[a] = l
+		f.inc()
 	}
-
-	move := -1
-	for move <= maxLayer {
-		move += 1
-		dep := layers[move]
-
-		if dep.scannerLocation(move) == 0 {
-			severity += dep.depth * dep.rge
-		}
-	}
-
 	return severity
-}
-
-func (j layer) scannerLocation(time int) int {
-	n := 0
-	loc := 0
-	inc := -1
-	for n < time {
-		if loc == j.rge-1 || loc == 0 {
-			inc = -inc
-		}
-		loc += inc
-		n += 1
-	}
-	return loc
 }

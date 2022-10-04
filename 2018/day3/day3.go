@@ -107,7 +107,6 @@ func part1() int {
 func part2() int {
 	input, _ := os.ReadFile("input.txt")
 	data := strings.Split(string(input), "\n")
-	overlaps := map[string]int{}
 	claims := []claim{}
 	hasOverlap := map[int]int{}
 
@@ -126,9 +125,6 @@ func part2() int {
 			if len(inter) > 0 {
 				delete(hasOverlap, currentClaim.id)
 				delete(hasOverlap, v.id)
-			}
-			for _, v := range inter {
-				overlaps[v] = 1
 			}
 		}
 	}

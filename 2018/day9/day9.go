@@ -98,11 +98,11 @@ func part1(players int, hiValue int) int {
 	n := 0
 	scores := map[int]int{}
 
-	for n < hiValue {
-		for player := 0; player < players; player++ {
-			n += 1
-			scores[player] += marbles.add(n)
-		}
+	for n <= hiValue {
+		player := n % players
+		n += 1
+		scores[player] += marbles.add(n)
+
 	}
 
 	max := 0
@@ -117,25 +117,25 @@ func part1(players int, hiValue int) int {
 func part1a(players int, hiValue int) int {
 	currentMarble := &Node{value: 0}
 	currentMarble.next = currentMarble
-	// currentMarble.prev = currentMarble
+	currentMarble.prev = currentMarble
 	n := 0
 	scores := map[int]int{}
-	for n < hiValue {
-		for player := 0; player < players; player++ {
-			n += 1
-			if n%1000000 == 0 {
-				fmt.Println(n, "of", hiValue)
-			}
-			if n%23 != 0 {
-				currentMarble = currentMarble.next.addNext(n)
-				continue
-			}
-			for i := 0; i < 7; i++ {
-				currentMarble = currentMarble.previous()
-			}
-			scores[player] += n + currentMarble.value
-			currentMarble = currentMarble.delete()
+	for n <= hiValue {
+		n += 1
+		player := n % players
+		if n%1000000 == 0 {
+			fmt.Println(n, "of", hiValue)
 		}
+		if n%23 != 0 {
+			currentMarble = currentMarble.next.addNext(n)
+			continue
+		}
+		for i := 0; i < 7; i++ {
+			currentMarble = currentMarble.previous()
+		}
+		scores[player] += n + currentMarble.value
+		currentMarble = currentMarble.delete()
+
 	}
 	max := 0
 	for _, v := range scores {

@@ -19,8 +19,7 @@ func Test_part1(t *testing.T) {
 	}{
 		{"1", args{9, 25}, 32},
 		{"2", args{10, 1618}, 8317},
-		// this example doesn't work. hmmm.
-		// {"3", args{13, 7999}, 146373},
+		{"3", args{13, 7999}, 146373},
 		{"4", args{17, 1104}, 2764},
 		{"5", args{21, 6111}, 54718},
 		{"6", args{30, 5807}, 37305},
@@ -46,7 +45,6 @@ func Test_part1a(t *testing.T) {
 	}{
 		{"1", args{9, 25}, 32},
 		{"2", args{10, 1618}, 8317},
-		// this example doesn't work. hmmm.
 		{"3", args{13, 7999}, 146373},
 		{"4", args{17, 1104}, 2764},
 		{"5", args{21, 6111}, 54718},

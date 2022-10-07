@@ -4,8 +4,6 @@ import "fmt"
 
 // var puzzleInput = "493 players; last marble is worth 71863 points"
 
-// https://dev.to/golangchar/singly-doubly-circular-linked-list-in-golang-490a
-
 type Node struct {
 	value int
 	next  *Node
@@ -27,13 +25,11 @@ func (n *Node) previous() *Node {
 	for node.next != n {
 		node = node.next
 	}
-	// n.prev = node
 	return node
 }
 
 func (n *Node) delete() *Node {
 	t := n.previous()
-	// n.next.prev = nil
 	t.next = n.next
 	return n.next
 }
@@ -135,7 +131,6 @@ func part1a(players int, hiValue int) int {
 		}
 		scores[player] += n + currentMarble.value
 		currentMarble = currentMarble.delete()
-
 	}
 	max := 0
 	for _, v := range scores {

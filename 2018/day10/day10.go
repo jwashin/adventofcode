@@ -127,7 +127,7 @@ func part1(test bool) {
 		f.iter()
 		count += 1
 	}
-
+	//  TODO stop iterating when zrange starts to go up again
 	for {
 		d := f.view()
 		for _, v := range d {

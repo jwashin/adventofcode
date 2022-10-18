@@ -1,4 +1,6 @@
 # from get_data import get_data_lines
+# https://www.reddit.com/r/adventofcode/comments/a6chwa/2018_day_15_solutions/
+
 
 MAX_HP = 200
 ATTK = 3
@@ -291,7 +293,7 @@ def setup_game(attack_power):
 
 if __name__ == '__main__':
     # part1
-    # setup_game(3)
+    setup_game(3)
 
     # part2
     # attack_power = 2

@@ -268,6 +268,8 @@ func (t tableau) String() string {
 
 // 250410 too high
 
+// TODO: see where the Python impl got it right && I got it wrong. But must move on...
+
 func part1(s string) int {
 	t := tableau{}
 	for y, line := range strings.Split(s, "\n") {

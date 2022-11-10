@@ -53,8 +53,8 @@ func (s intSet) contains(i int) bool {
 	return false
 }
 
-// using the other guy's code, we see the 
-// answer to part2 is 610, but his part1 was wrong...
+// using the other guy's code, we got the 
+// answer to part2 is 610, though his part1 was wrong...
 
 // TODO: get the right answer
 

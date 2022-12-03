@@ -62,6 +62,7 @@ func mostCalories3(data string) int {
 	elfLoads = append(elfLoads, accum)
 
 	sort.Ints(elfLoads)
+	// reverse!
 	for i, j := 0, len(elfLoads)-1; i < j; i, j = i+1, j-1 {
 		elfLoads[i], elfLoads[j] = elfLoads[j], elfLoads[i]
 	}

@@ -50,38 +50,29 @@ func maxScenicScore(s string) int {
 	return score
 }
 
-func reverseSwapRunes(s string) string {
-	chars := []rune(s)
-	for i, j := 0, len(chars)-1; i < j; i, j = i+1, j-1 {
-		chars[i], chars[j] = chars[j], chars[i]
-	}
-	return string(chars)
-}
-
 func scenicScore(y int, x int, forest []string) int {
 	treeHeight, _ := strconv.Atoi(string(forest[y][x]))
 	top, bottom, left, right := 0, 0, 0, 0
 	t, b, l, r := "", "", "", ""
-	for j, v := range forest {
-		for i, w := range v {
-			c := string(w)
-			if i == x && j < y {
-				t += c
-			}
-			if i == x && j > y {
-				b += c
-			}
-			if j == y && i < x {
-				l += c
-			}
-			if j == y && i > x {
-				r += c
-			}
+
+	for i, v := range forest[y] {
+		c := string(v)
+		if i < x {
+			l = c + l
+		}
+		if i > x {
+			r += c
 		}
 	}
-	// reverse t and l
-	t = reverseSwapRunes(t)
-	l = reverseSwapRunes(l)
+	for j, line := range forest {
+		c := string(line[x])
+		if j < y {
+			t = c + t
+		}
+		if j > y {
+			b += c
+		}
+	}
 
 	for _, v := range t {
 		ht, _ := strconv.Atoi(string(v))
@@ -134,24 +125,25 @@ func isVisible(x int, y int, forest []string) bool {
 	top, bottom, left, right := true, true, true, true
 	t, b, l, r := "", "", "", ""
 
-	for i, v := range forest {
-		for j, w := range v {
-			c := string(w)
-			if i == x && j < y {
-				t += c
-			}
-			if i == x && j > y {
-				b += c
-			}
-			if j == y && i < x {
-				l += c
-			}
-			if j == y && i > x {
-				r += c
-			}
+	for i, v := range forest[y] {
+		c := string(v)
+		if i < x {
+			l = c + l
 		}
-
+		if i > x {
+			r += c
+		}
 	}
+	for j, line := range forest {
+		c := string(line[x])
+		if j < y {
+			t = c + t
+		}
+		if j > y {
+			b += c
+		}
+	}
+
 	for _, v := range t {
 		ht, _ := strconv.Atoi(string(v))
 		if ht >= treeHeight {

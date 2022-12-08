@@ -104,7 +104,7 @@ func part2(s string) int {
 
 func dirMaker(s string) *FSDirectory {
 
-	root := FSDirectory{name: "/", subdirs: []*FSDirectory{}}
+	root := FSDirectory{name: "/"}
 
 	currLoc := &root
 

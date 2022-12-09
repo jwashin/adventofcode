@@ -20,10 +20,10 @@ type coordinate struct {
 
 func follow(s string, knots int) int {
 	rope := []*coordinate{}
-	for x := 0; x < knots; x++ {
+	for len(rope) < knots {
 		rope = append(rope, &coordinate{0, 0})
 	}
-	tailPositions := map[string]int{"0 0": 1}
+	tailPositions := map[coordinate]int{{0, 0}: 1}
 
 	// decision map
 	// dx, dy: movex, movey
@@ -50,17 +50,15 @@ func follow(s string, knots int) int {
 	d2m[coordinate{2, -2}] = coordinate{1, -1}
 
 	data := strings.Split(s, "\n")
-
 	for _, v := range data {
 		f := strings.Fields(v)
 		direction := f[0]
 		dist, _ := strconv.Atoi(f[1])
 		moveQ := ""
-		for m := 0; m < dist; m++ {
+		for len(moveQ) < dist {
 			moveQ += direction
 		}
 		for len(moveQ) > 0 {
-
 			move := moveQ[0]
 			moveQ = moveQ[1:]
 			// head move
@@ -84,9 +82,8 @@ func follow(s string, knots int) int {
 				v.x += move.x
 				v.y += move.y
 				if k == len(rope)-1 {
-					tailPositions[fmt.Sprintf("%d %d", v.x, v.y)] += 1
+					tailPositions[coordinate{v.x, v.y}] += 1
 				}
-
 			}
 		}
 	}

@@ -78,7 +78,9 @@ func follow(s string, knots int) int {
 				if k == 0 {
 					continue
 				}
-				move := d2m[coordinate{rope[k-1].x - v.x, rope[k-1].y - v.y}]
+				dx := rope[k-1].x - v.x
+				dy := rope[k-1].y - v.y
+				move := d2m[coordinate{dx, dy}]
 				v.x += move.x
 				v.y += move.y
 				if k == len(rope)-1 {

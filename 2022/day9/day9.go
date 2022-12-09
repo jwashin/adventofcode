@@ -18,36 +18,38 @@ type coordinate struct {
 	y int
 }
 
-func follow(s string, count int) int {
-	data := strings.Split(s, "\n")
-	nTails := count
+func follow(s string, knots int) int {
 	rope := []*coordinate{}
-	for x := 0; x < nTails; x++ {
+	for x := 0; x < knots; x++ {
 		rope = append(rope, &coordinate{0, 0})
 	}
-
 	tailPositions := map[string]int{"0 0": 1}
-	d := map[coordinate]coordinate{}
+
+	// decision map
 	// dx, dy: movex, movey
-	d[coordinate{0, -2}] = coordinate{0, 1}
-	d[coordinate{0, 2}] = coordinate{0, -1}
-	d[coordinate{-2, 0}] = coordinate{1, 0}
-	d[coordinate{2, 0}] = coordinate{-1, 0}
+	d2m := map[coordinate]coordinate{}
 
-	d[coordinate{2, 1}] = coordinate{-1, -1}
-	d[coordinate{2, -1}] = coordinate{-1, 1}
-	d[coordinate{-2, 1}] = coordinate{1, -1}
-	d[coordinate{-2, -1}] = coordinate{1, 1}
+	d2m[coordinate{0, -2}] = coordinate{0, -1}
+	d2m[coordinate{0, 2}] = coordinate{0, 1}
+	d2m[coordinate{-2, 0}] = coordinate{-1, 0}
+	d2m[coordinate{2, 0}] = coordinate{1, 0}
 
-	d[coordinate{1, 2}] = coordinate{-1, -1}
-	d[coordinate{1, -2}] = coordinate{-1, 1}
-	d[coordinate{-1, 2}] = coordinate{1, -1}
-	d[coordinate{-1, -2}] = coordinate{1, 1}
+	d2m[coordinate{2, 1}] = coordinate{1, 1}
+	d2m[coordinate{2, -1}] = coordinate{1, -1}
+	d2m[coordinate{-2, 1}] = coordinate{-1, 1}
+	d2m[coordinate{-2, -1}] = coordinate{-1, -1}
 
-	d[coordinate{-2, -2}] = coordinate{1, 1}
-	d[coordinate{2, 2}] = coordinate{-1, -1}
-	d[coordinate{-2, 2}] = coordinate{1, -1}
-	d[coordinate{2, -2}] = coordinate{-1, 1}
+	d2m[coordinate{1, 2}] = coordinate{1, 1}
+	d2m[coordinate{1, -2}] = coordinate{1, -1}
+	d2m[coordinate{-1, 2}] = coordinate{-1, 1}
+	d2m[coordinate{-1, -2}] = coordinate{-1, -1}
+
+	d2m[coordinate{-2, -2}] = coordinate{-1, -1}
+	d2m[coordinate{2, 2}] = coordinate{1, 1}
+	d2m[coordinate{-2, 2}] = coordinate{-1, 1}
+	d2m[coordinate{2, -2}] = coordinate{1, -1}
+
+	data := strings.Split(s, "\n")
 
 	for _, v := range data {
 		f := strings.Fields(v)
@@ -75,20 +77,16 @@ func follow(s string, count int) int {
 			}
 			// tail moves
 			for k, v := range rope {
-				if k > 0 {
-					currX := rope[k-1].x
-					currY := rope[k-1].y
-					tailX := v.x
-					tailY := v.y
-					isLast := k == len(rope)-1
-
-					move := d[coordinate{currX - tailX, currY - tailY}]
-					v.x -= move.x
-					v.y -= move.y
-					if isLast {
-						tailPositions[fmt.Sprintf("%d %d", v.x, v.y)] += 1
-					}
+				if k == 0 {
+					continue
 				}
+				move := d2m[coordinate{rope[k-1].x - v.x, rope[k-1].y - v.y}]
+				v.x += move.x
+				v.y += move.y
+				if k == len(rope)-1 {
+					tailPositions[fmt.Sprintf("%d %d", v.x, v.y)] += 1
+				}
+
 			}
 		}
 	}

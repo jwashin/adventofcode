@@ -27,6 +27,10 @@ func part1(s string) int {
 	return total
 }
 
+// not proud of this.
+// getX and signalStrength should work identically,
+// but they don't
+
 func drawScreen(s string) string {
 	cycle := -1
 	out := []string{}

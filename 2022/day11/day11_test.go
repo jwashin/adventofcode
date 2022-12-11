@@ -39,7 +39,7 @@ func Test_monkeyBusiness(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want uint
+		want int
 	}{
 		{"1", args{w, 20, false}, 10605},
 		{"2", args{w, 10000, true}, 2713310158},

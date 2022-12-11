@@ -14,7 +14,7 @@ func main() {
 	fmt.Println("Part2:", monkeyBusiness(string(input), 10000, true))
 }
 
-func monkeyBusiness(s string, rounds int, part2 bool) uint {
+func monkeyBusiness(s string, rounds int, part2 bool) int {
 	monkeys := parseMonkeys(s)
 
 	for round := 1; round <= rounds; round++ {
@@ -25,33 +25,38 @@ func monkeyBusiness(s string, rounds int, part2 bool) uint {
 				d.items = append(d.items, w.item)
 			}
 		}
-		if round == 1 || round == 20 || round%1000 == 0 {
-			fmt.Println("== after round", round, "==")
-			for _, v := range monkeys {
-				fmt.Println("Monkey", v.id, "inspected items", v.inspections, "times.")
-			}
-		}
+		// if round == 0 || round == 1 || round == 20 || round%1000 == 0 {
+		// 	fmt.Println("== after round", round, "==")
+		// 	for _, v := range monkeys {
+		// 		fmt.Println("Monkey", v.id, "inspected items", v.inspections, "times.")
+		// 	}
+		// }
 	}
 	ins := []int{}
 	for _, v := range monkeys {
 		ins = append(ins, v.inspections)
 	}
 	sort.Ints(ins)
-	return uint(ins[len(ins)-1]) * uint(ins[len(ins)-2])
+	return int(ins[len(ins)-1]) * int(ins[len(ins)-2])
 }
 
 type Monkey struct {
 	id          int
-	items       []uint
+	items       []int
 	op          string
-	test        string
+	test        int
 	t           int
 	f           int
 	inspections int
+	// needed least common multiple for part 2.
+	// It's product of all the monkeys' test factors
+	// We mod the thrown values by this to keep them from
+	// getting too big
+	lcm int
 }
 
 type throw struct {
-	item        uint
+	item        int
 	destination int
 }
 
@@ -63,33 +68,29 @@ func (m *Monkey) doTurn(part2 bool) []throw {
 		if !part2 {
 			nv = nv / 3
 		}
-		f := strings.Fields(m.test)
-		d1, _ := strconv.Atoi(f[len(f)-1])
-		d := uint(d1)
+		d := m.test
 		if nv%d == 0 {
 			throws = append(throws, throw{nv, m.t})
 		} else {
 			throws = append(throws, throw{nv, m.f})
 		}
 	}
-	m.items = []uint{}
+	m.items = []int{}
 	return throws
 }
 
-func (m *Monkey) doOp(item uint) uint {
+func (m *Monkey) doOp(item int) int {
 	f := strings.Fields(m.op)
-	first, second, val := uint(0), uint(0), uint(0)
+	var first, second, val int
 	if f[0] == "old" {
 		first = item
 	} else {
-		irst, _ := strconv.Atoi(f[0])
-		first = uint(irst)
+		first, _ = strconv.Atoi(f[0])
 	}
 	if f[2] == "old" {
 		second = item
 	} else {
-		econd, _ := strconv.Atoi(f[2])
-		second = uint(econd)
+		second, _ = strconv.Atoi(f[2])
 	}
 	if f[1] == "*" {
 		val = first * second
@@ -97,17 +98,17 @@ func (m *Monkey) doOp(item uint) uint {
 	if f[1] == "+" {
 		val = first + second
 	}
-	return val
+	return val % m.lcm
 }
 
 func parseMonkeys(s string) []*Monkey {
 
 	monkeys := []*Monkey{}
 
-	id, t, f := 0, 0, 0
-	items := []uint{}
-	op, test := "", ""
-
+	id, t, f, test := 0, 0, 0, 0
+	items := []int{}
+	op := ""
+	lcm := 1
 	for _, v := range strings.Split(s, "\n") {
 		v = strings.TrimSpace(v)
 
@@ -115,14 +116,14 @@ func parseMonkeys(s string) []*Monkey {
 			id, _ = strconv.Atoi(string(v[7]))
 		}
 		if strings.Contains(v, "Starting") {
-			items = []uint{}
+			items = []int{}
 			ix := strings.Index(v, ":")
 			z := v[ix+1:]
 			z = strings.ReplaceAll(z, ",", "")
 			j := strings.Fields(z)
 			for _, w := range j {
 				d, _ := strconv.Atoi(w)
-				items = append(items, uint(d))
+				items = append(items, int(d))
 			}
 		}
 		if strings.Contains(v, "Operation") {
@@ -130,8 +131,9 @@ func parseMonkeys(s string) []*Monkey {
 			op = v[ix+1:]
 		}
 		if strings.Contains(v, "Test") {
-			ix := strings.Index(v, ":")
-			test = v[ix+1:]
+			f1 := strings.Fields(v)
+			test, _ = strconv.Atoi(f1[3])
+			lcm *= test
 		}
 		if strings.Contains(v, "true") {
 			ix := string(v[len(v)-1])
@@ -143,6 +145,9 @@ func parseMonkeys(s string) []*Monkey {
 			monkey := Monkey{id: id, items: items, op: op, test: test, t: t, f: f, inspections: 0}
 			monkeys = append(monkeys, &monkey)
 		}
+	}
+	for _, v := range monkeys {
+		v.lcm = lcm
 	}
 	return monkeys
 }

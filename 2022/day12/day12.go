@@ -105,14 +105,13 @@ func hillClimb(arr []string, start coordinate) int {
 	checked := map[coordinate]bool{start: true}
 	queue := []string{""}
 	for len(queue) > 0 {
-		// shortest path goes first
+		// shortest path goes first. so sort
 		sort.Slice(queue, func(i, j int) bool {
 			return len(queue[i]) < len(queue[j])
 		})
 		currPath := queue[0]
 		queue = queue[1:]
 		currLoc, currVal, _ = coordFromPath(arr, start, currPath)
-
 		if currLoc == end {
 			return len(currPath)
 		}

@@ -25,6 +25,16 @@ func makePoint(s string) coordinate {
 	return coordinate{x, y}
 }
 
+func countStaticSand(m map[coordinate]int) int {
+	count := 0
+	for _, v := range m {
+		if v > 1 {
+			count += 1
+		}
+	}
+	return count
+}
+
 func addLine(m map[coordinate]int, start coordinate, end coordinate) map[coordinate]int {
 	if start.x == end.x {
 		// vertical line
@@ -69,6 +79,8 @@ func parse(s string) map[coordinate]int {
 	return m
 }
 
+// dropSand2 was copy-pasted from dropSand and modified. Could be refactored.
+
 func dropSand2(s string) int {
 	matrix := parse(s)
 	maxY := 0
@@ -82,24 +94,13 @@ func dropSand2(s string) int {
 	for !stop {
 		currLoc := startPoint
 		for {
-			canMove := ""
 			if matrix[coordinate{currLoc.x, currLoc.y + 1}] < 1 {
-				canMove = "d"
-			} else if matrix[coordinate{currLoc.x - 1, currLoc.y + 1}] < 1 {
-				canMove = "dl"
-			} else if matrix[coordinate{currLoc.x + 1, currLoc.y + 1}] < 1 {
-				canMove = "dr"
-			} else {
-				canMove = "no"
-			}
-
-			if canMove == "d" {
 				currLoc = coordinate{currLoc.x, currLoc.y + 1}
-			} else if canMove == "dl" {
+			} else if matrix[coordinate{currLoc.x - 1, currLoc.y + 1}] < 1 {
 				currLoc = coordinate{currLoc.x - 1, currLoc.y + 1}
-			} else if canMove == "dr" {
+			} else if matrix[coordinate{currLoc.x + 1, currLoc.y + 1}] < 1 {
 				currLoc = coordinate{currLoc.x + 1, currLoc.y + 1}
-			} else if canMove == "no" {
+			} else {
 				matrix[currLoc] = 2
 				if currLoc == startPoint {
 					stop = true
@@ -113,13 +114,7 @@ func dropSand2(s string) int {
 			}
 		}
 	}
-	count := 0
-	for _, v := range matrix {
-		if v == 2 {
-			count += 1
-		}
-	}
-	return count
+	return countStaticSand(matrix)
 }
 
 func dropSand(s string) int {
@@ -135,24 +130,13 @@ func dropSand(s string) int {
 	for !stop {
 		currLoc := startPoint
 		for {
-			canMove := ""
 			if matrix[coordinate{currLoc.x, currLoc.y + 1}] < 1 {
-				canMove = "d"
-			} else if matrix[coordinate{currLoc.x - 1, currLoc.y + 1}] < 1 {
-				canMove = "dl"
-			} else if matrix[coordinate{currLoc.x + 1, currLoc.y + 1}] < 1 {
-				canMove = "dr"
-			} else {
-				canMove = "no"
-			}
-
-			if canMove == "d" {
 				currLoc = coordinate{currLoc.x, currLoc.y + 1}
-			} else if canMove == "dl" {
+			} else if matrix[coordinate{currLoc.x - 1, currLoc.y + 1}] < 1 {
 				currLoc = coordinate{currLoc.x - 1, currLoc.y + 1}
-			} else if canMove == "dr" {
+			} else if matrix[coordinate{currLoc.x + 1, currLoc.y + 1}] < 1 {
 				currLoc = coordinate{currLoc.x + 1, currLoc.y + 1}
-			} else if canMove == "no" {
+			} else {
 				matrix[currLoc] = 2
 				break
 			}
@@ -162,11 +146,5 @@ func dropSand(s string) int {
 			}
 		}
 	}
-	count := 0
-	for _, v := range matrix {
-		if v == 2 {
-			count += 1
-		}
-	}
-	return count
+	return countStaticSand(matrix)
 }

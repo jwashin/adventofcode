@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type valve struct {
+type valv struct {
 	name         string
 	open         bool
 	flowRate     int
@@ -61,7 +61,7 @@ func getValves(s []string) []valve {
 	return valves
 }
 
-func part1(s string) int {
+func part1x(s string) int {
 	input := strings.Split(s, "\n")
 	valves := getValves(input)
 	valveData := valveMap{}
@@ -69,16 +69,16 @@ func part1(s string) int {
 		valveData[v.name] = v
 	}
 	paths := map[string][]string{}
-	travelCost := map[string]int{}
+	// travelCost := map[string]int{}
 	for k, v := range valves {
 		if v.flowRate > 0 || k == 0 {
 			for _, w := range valves {
 				if v.name != w.name && w.flowRate > 0 {
 					path, err := valveData.bestPath(v.name, w.name)
 					if err == nil {
-						paths[v.name+" "+w.name] = path
+						paths[v.name+" "+w.name] = path[1:]
 						// paths[v.name + " " + w.name] = path
-						travelCost[v.name+" "+w.name] = len(path)
+						// travelCost[v.name+" "+w.name] = len(path[1:])
 						// travelCost[stringPair{w.name, v.name}] = len(path)
 					}
 				}
@@ -105,7 +105,7 @@ func part1(s string) int {
 		for _, v := range openValves {
 			totalPressureReleased += valveData[v].flowRate
 		}
-		for len(moves) > 0 {
+		if len(moves) > 0 {
 			move := moves[0]
 			moves = moves[1:]
 			if move == "open" {
@@ -113,37 +113,33 @@ func part1(s string) int {
 			} else {
 				currLoc = move
 			}
+			continue
 		}
+		tr := timeLimit - t + 1
 		newLoc := ""
-		timeFactor := 1
-		for newLoc == "" && len(toVisit) > 0 {
-			timeFactor += 1
+		if len(toVisit) > 0 {
 			max := 0
 			for _, v := range toVisit {
 				ky := currLoc + " " + v
 				tp := paths[ky]
 				tc := len(tp)
-				// travelCost[stringPair{currLoc, v}]
-				if tc <= timeFactor {
-					tr := timeLimit - t
-					pTot := (tr - tc - 2) * valveData[v].flowRate
-					if pTot > max && tc <= timeFactor {
-						max = pTot
-						newLoc = v
-						timeFactor = 1
-					}
+				days := tr - (tc + 1)
+				factor := days * valveData[v].flowRate
+				if factor > max {
+					max = factor
+					newLoc = v
 				}
 			}
-		}
-		toVisitNew := []string{}
-		for _, v := range toVisit {
-			if v != newLoc {
-				toVisitNew = append(toVisitNew, v)
+			toVisitNew := []string{}
+			for _, v := range toVisit {
+				if v != newLoc {
+					toVisitNew = append(toVisitNew, v)
+				}
 			}
+			toVisit = toVisitNew
+			moves = paths[currLoc+" "+newLoc]
+			moves = append(moves, "open")
 		}
-		toVisit = toVisitNew
-		moves = paths[currLoc+" "+newLoc]
-		moves = append(moves, "open")
 	}
 	return totalPressureReleased
 

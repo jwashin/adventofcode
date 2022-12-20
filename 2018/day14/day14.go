@@ -10,6 +10,7 @@ func main() {
 	fmt.Println("2.", part2("306281"))
 }
 
+// circular linked list
 type Node struct {
 	value int
 	next  *Node

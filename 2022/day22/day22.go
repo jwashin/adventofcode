@@ -214,8 +214,11 @@ func moveTo(t []string, c coordinate, direction string) (coordinate, error) {
 		for _, v := range t {
 			row += string(v[c.column])
 		}
-		currIndex := c.row
+		currIndex := c.column
 		for k := currIndex - 1; k >= 0; k-- {
+			if row[k] == ' ' {
+				continue
+			}
 			if row[k] == '#' {
 				return c, errors.New("hit a wall")
 			}
@@ -224,6 +227,9 @@ func moveTo(t []string, c coordinate, direction string) (coordinate, error) {
 			}
 		}
 		for k := len(row) - 1; k > currIndex; k-- {
+			if row[k] == ' ' {
+				continue
+			}
 			if row[k] == '#' {
 				return c, errors.New("hit a wall")
 			}
@@ -237,6 +243,7 @@ func moveTo(t []string, c coordinate, direction string) (coordinate, error) {
 }
 
 // 116156 too high
+// 78360 too high
 
 func part1(s string) int {
 	tableau, instructions := getData(s)

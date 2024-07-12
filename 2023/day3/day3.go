@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var symbols = "/@#$%&*+="
+var symbols = "/@#$%&*+=-"
 var digits = "0123456789"
 
 func main() {
@@ -16,6 +16,8 @@ func main() {
 }
 
 func part1(s string) int {
+	// 552835 too low
+	// 535104 too low
 	data := getValidNumbers(s)
 	total := 0
 	for _, v := range data {
@@ -39,6 +41,12 @@ func getIntegers(s string) ([]string, []int) {
 			}
 		}
 	}
+	// if the end of a line is a number...
+	if len(candidate) > 0 {
+		numbers = append(numbers, candidate)
+		candidate = ""
+		endIndexes = append(endIndexes, len(s)-1)
+	}
 	return numbers, endIndexes
 }
 
@@ -59,21 +67,33 @@ func getValidNumbers(s string) []int {
 }
 
 func isSymbolAdjacent(number string, endIndexes []int, s string, index int, ky int) bool {
+	// index is the current line number
+
+	// make a rectangular blob one char bigger than number
+	// on all sides
 	testZone := []string{}
+
 	lines := strings.Split(s, "\n")
+
+	// if we are not at the top, add the line above
 	if index > 0 {
 		testZone = append(testZone, lines[index-1])
 	}
+	// add self line
 	testZone = append(testZone, lines[index])
+
+	// if we are not at the bottom, add the line below
 	if index < len(lines)-1 {
 		testZone = append(testZone, lines[index+1])
 	}
+
 	start := endIndexes[ky] - len(number) - 1
 	if start < 0 {
 		start = 0
 	}
+
 	end := endIndexes[ky] + 1
-	if end >= len(testZone[0]) {
+	if end > len(testZone[0])-1 {
 		end -= 1
 	}
 	for _, v := range testZone {

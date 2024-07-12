@@ -42,12 +42,40 @@ func getIntegers(s string) ([]string, []int) {
 		}
 	}
 	// if the end of a line is a number...
+	// omitting this was my error in part 1
 	if len(candidate) > 0 {
 		numbers = append(numbers, candidate)
 		candidate = ""
 		endIndexes = append(endIndexes, len(s)-1)
 	}
 	return numbers, endIndexes
+}
+
+func getIntegerAtIndex(s string, index int) int {
+	candidate := string(s[index])
+	leftDone := false
+	leftidx := index
+	for !leftDone && leftidx > 0 {
+		leftidx -= 1
+		if strings.Contains(digits, string(s[leftidx])) {
+			candidate = string(s[leftidx]) + candidate
+		} else {
+			leftDone = false
+		}
+	}
+	rightDone := false
+	rightidx := index
+	for !rightDone && rightidx <= len(s)-1 {
+		rightidx += 1
+		if strings.Contains(digits, string(s[rightidx])) {
+			candidate = candidate + string(s[rightidx])
+		} else {
+			rightDone = false
+		}
+	}
+	t, _ := strconv.Atoi(candidate)
+	return t
+
 }
 
 func getValidNumbers(s string) []int {

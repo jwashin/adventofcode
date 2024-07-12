@@ -51,6 +51,20 @@ func getIntegers(s string) ([]string, []int) {
 	return numbers, endIndexes
 }
 
+func getAllStarCoordinates(s string) [][]int {
+	tableau := strings.Split(s, "\n")
+	stars := [][]int{}
+	for line := range tableau {
+		for column, char := range tableau[line] {
+			if char == '*' {
+				coordinate := []int{line, column}
+				stars = append(stars, coordinate)
+			}
+		}
+	}
+	return stars
+}
+
 func getIntegerAtIndex(s string, index int) int {
 	candidate := string(s[index])
 	leftDone := false

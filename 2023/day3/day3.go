@@ -1,12 +1,28 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
 
 var symbols = "/@#$%&*+="
 var digits = "0123456789"
+
+func main() {
+	input, _ := os.ReadFile("input.txt")
+	fmt.Println("part 1:", part1(string(input)))
+}
+
+func part1(s string) int {
+	data := getValidNumbers(s)
+	total := 0
+	for _, v := range data {
+		total += v
+	}
+	return total
+}
 
 func getIntegers(s string) ([]string, []int) {
 	numbers := []string{}
@@ -32,8 +48,8 @@ func getValidNumbers(s string) []int {
 	lines := strings.Split(s, "\n")
 	for index, line := range lines {
 		numbers, endIndexes := getIntegers(line)
-		for _, number := range numbers {
-			if isSymbolAdjacent(number, endIndexes, s, index) {
+		for ky, number := range numbers {
+			if isSymbolAdjacent(number, endIndexes, s, index, ky) {
 				theNumber, _ := strconv.Atoi(number)
 				output = append(output, theNumber)
 			}
@@ -42,7 +58,7 @@ func getValidNumbers(s string) []int {
 	return output
 }
 
-func isSymbolAdjacent(number string, endIndexes []int, s string, index int) bool {
+func isSymbolAdjacent(number string, endIndexes []int, s string, index int, ky int) bool {
 	testZone := []string{}
 	lines := strings.Split(s, "\n")
 	if index > 0 {
@@ -52,11 +68,11 @@ func isSymbolAdjacent(number string, endIndexes []int, s string, index int) bool
 	if index < len(lines)-1 {
 		testZone = append(testZone, lines[index+1])
 	}
-	start := endIndexes[index] - len(number)
+	start := endIndexes[ky] - len(number) - 1
 	if start < 0 {
 		start = 0
 	}
-	end := endIndexes[index] + 1
+	end := endIndexes[ky] + 1
 	if end >= len(testZone[0]) {
 		end -= 1
 	}

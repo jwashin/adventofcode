@@ -60,10 +60,12 @@ func part2(s string) int {
 		// Card   1: 58  6 71 93 96 38 25 29 17  8 | 79 33 93 58 53 96 71  8 67 90 17  6 46 85 64 25 73 32 18 52 77 16 63  2 38
 		card := cards[0]
 		gameCount := 0
-		if card.value > 0 {
-			gameCount = card.value
+		if cardMap[card.cardNumber].value > 0 {
+			gameCount = cardMap[card.cardNumber].value
 		} else {
 			gameCount = countMatches(card.winners, card.candidates)
+			card.value = gameCount
+			cardMap[card.cardNumber] = card
 		}
 		if gameCount > 0 {
 			count := 0

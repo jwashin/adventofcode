@@ -17,8 +17,9 @@ func getData(s string) ([]int, map[string][][]int) {
 	s = strings.TrimSpace(s)
 	seeds := []int{}
 	translations := map[string][][]int{}
+	mapName := ""
+	mapLine := []int{}
 	for _, line := range strings.Split(s, "\n") {
-		mapName := ""
 		t := strings.TrimSpace(line)
 		if len(t) > 0 {
 			flds := strings.Fields(t)
@@ -31,12 +32,13 @@ func getData(s string) ([]int, map[string][][]int) {
 				mapName = flds[0]
 				translations[mapName] = [][]int{}
 			} else {
-				mapLine := []int{}
 				for _, v := range flds {
 					d, _ := strconv.Atoi(v)
 					mapLine = append(mapLine, d)
-					translations[mapName] = append(translations[mapName], mapLine)
 				}
+
+				translations[mapName] = append(translations[mapName], mapLine)
+				mapLine = []int{}
 			}
 		}
 	}
@@ -47,7 +49,7 @@ func part1(s string) int {
 	locationNumber := math.MaxInt
 	s = strings.TrimSpace(s)
 	seeds, translations := getData(s)
-	for seed := range seeds {
+	for _, seed := range seeds {
 		soil := translator(seed, translations, "seed-to-soil")
 		fertilizer := translator(soil, translations, "soil-to-fertilizer")
 		water := translator(fertilizer, translations, "fertilizer-to-water")
@@ -72,7 +74,8 @@ func translator(seed int, translator map[string][][]int, dialect string) int {
 		rangeLength := rge[2]
 		if seed >= sourceRangeStart && seed < sourceRangeStart+rangeLength {
 			diff := seed - sourceRangeStart
-			return destinationRangeStart + diff
+			out := destinationRangeStart + diff
+			return out
 		}
 	}
 	return seed

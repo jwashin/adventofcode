@@ -47,9 +47,10 @@ func getData(s string) ([]int, map[string][][]int) {
 }
 
 func part2(s string) int {
+	// 167883009 too high
 	locationNumber := math.MaxInt
 	s = strings.TrimSpace(s)
-	memo := map[int]int{}
+	// memo := map[int]int{}
 	seeds, translations := getData(s)
 	location := 0
 	// seeds = part2seeds(seeds)
@@ -61,19 +62,13 @@ func part2(s string) int {
 		for num > 0 {
 			num -= 1
 			seed += 1
-
-			if memo[seed] == 0 {
-				soil := translator(seed, translations, "seed-to-soil")
-				fertilizer := translator(soil, translations, "soil-to-fertilizer")
-				water := translator(fertilizer, translations, "fertilizer-to-water")
-				light := translator(water, translations, "water-to-light")
-				temperature := translator(light, translations, "light-to-temperature")
-				humidity := translator(temperature, translations, "temperature-to-humidity")
-				location = translator(humidity, translations, "humidity-to-location")
-				memo[seed] = location
-			} else {
-				location = memo[seed]
-			}
+			soil := translator(seed, translations, "seed-to-soil")
+			fertilizer := translator(soil, translations, "soil-to-fertilizer")
+			water := translator(fertilizer, translations, "fertilizer-to-water")
+			light := translator(water, translations, "water-to-light")
+			temperature := translator(light, translations, "light-to-temperature")
+			humidity := translator(temperature, translations, "temperature-to-humidity")
+			location = translator(humidity, translations, "humidity-to-location")
 
 			if location < locationNumber {
 				locationNumber = location

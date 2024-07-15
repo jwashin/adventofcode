@@ -11,6 +11,7 @@ import (
 func main() {
 	input, _ := os.ReadFile("input.txt")
 	fmt.Println("Part 1:", part1(string(input)))
+	fmt.Println("Part 2:", part2(string(input)))
 }
 
 func getData(s string) ([]int, map[string][][]int) {
@@ -43,6 +44,43 @@ func getData(s string) ([]int, map[string][][]int) {
 		}
 	}
 	return seeds, translations
+}
+
+func part2(s string) int {
+	locationNumber := math.MaxInt
+	s = strings.TrimSpace(s)
+	memo := map[int]int{}
+	seeds, translations := getData(s)
+	location := 0
+	// seeds = part2seeds(seeds)
+	for len(seeds) > 0 {
+		fmt.Println(len(seeds))
+		seed := seeds[0] - 1
+		num := seeds[1]
+		seeds = seeds[2:]
+		for num > 0 {
+			num -= 1
+			seed += 1
+
+			if memo[seed] == 0 {
+				soil := translator(seed, translations, "seed-to-soil")
+				fertilizer := translator(soil, translations, "soil-to-fertilizer")
+				water := translator(fertilizer, translations, "fertilizer-to-water")
+				light := translator(water, translations, "water-to-light")
+				temperature := translator(light, translations, "light-to-temperature")
+				humidity := translator(temperature, translations, "temperature-to-humidity")
+				location = translator(humidity, translations, "humidity-to-location")
+				memo[seed] = location
+			} else {
+				location = memo[seed]
+			}
+
+			if location < locationNumber {
+				locationNumber = location
+			}
+		}
+	}
+	return locationNumber
 }
 
 func part1(s string) int {

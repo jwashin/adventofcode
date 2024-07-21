@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
 func main() {
 	input, _ := os.ReadFile("input.txt")
 	fmt.Println("Part1:", part1(string(input)))
+	fmt.Println("Part2:", part2(string(input)))
 }
 
 type Coordinate struct {
@@ -141,41 +143,52 @@ func part2(s string) int {
 		return 0
 	}
 	// count := 0
-	distances := map[Coordinate]int{}
-	distances[start] = 0
+	// distances := map[Coordinate]int{}
+	// distances[start] = 0
 	// currentLocation := start
 	queue := []Coordinate{start}
 	used := map[Coordinate]int{}
+	perimeter := []Coordinate{}
 	for len(queue) > 0 {
 		cand := queue[0]
 		used[cand] = 1
+		perimeter = append(perimeter, cand)
 		queue = queue[1:]
-		// count += 1
-		locs := candidates(cand, tableau)
+		cands := candidates(cand, tableau)
+		locs := []Coordinate{}
+		for _, v := range cands {
+			if v.col == cand.col && v.row == cand.row {
+				continue
+			}
+			locs = append(locs, v)
+		}
+		// queue = append(queue, locs[0])
+
 		for _, v := range locs {
 			if used[v] != 1 {
-				distances[v] = distances[cand] + 1
 				queue = append(queue, v)
+				break
 			}
 		}
 	}
-	insideCount := 0
-	insideItems := []Coordinate{}
-	for row, line := range tableau {
-		outside := used[Coordinate{row, 0}] != 1
-		for col := range line[1:] {
-			currLoc := Coordinate{row, col + 1}
-			if used[currLoc] == 1 {
-				if strings.Contains("|", string(currentCharacter(Coordinate{row, col + 1}, tableau))) {
-					outside = !outside
-				}
-			} else if !outside {
-				insideCount += 1
-				insideItems = append(insideItems, currLoc)
-			}
-		}
+	// we went the wrong way around
+	slices.Reverse(perimeter)
+	a := AreaOfClosedLoop(perimeter)
 
+	// pick's theorem
+	// area = (number of interior points) + (number of perimeter points)/2 -1
+
+	points := 1 + int(a) - len(perimeter)/2
+
+	return points
+}
+
+// shoelace function. (only for integers) Thanks, Gemini
+func AreaOfClosedLoop(points []Coordinate) int {
+	area := 0
+	for i := 0; i < len(points); i++ {
+		j := (i + 1) % len(points) // Wrap around for the last point
+		area += points[i].col*points[j].row - points[j].col*points[i].row
 	}
-
-	return len(insideItems)
+	return area / 2
 }

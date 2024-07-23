@@ -2,10 +2,23 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
-	"strconv"
 	"strings"
 )
+
+func fitsCriteria(s string, criterion string) bool {
+	// s = strings.TrimSpace(s)
+	t := strings.Fields(s)
+	if len(t) != len(strings.Split(criterion, ",")) {
+		return false
+	}
+	olist := []string{}
+	for _, v := range t {
+		olist = append(olist, fmt.Sprint(len(v)))
+	}
+	return strings.Join(olist, ",") == criterion
+}
 
 func main() {
 	input, _ := os.ReadFile("input.txt")
@@ -18,54 +31,103 @@ func part1(s string) int {
 	data := strings.Split(s, "\n")
 	count := 0
 	for _, v := range data {
-		z := strings.Split(v, " ")
-		itemCounts := []int{}
-		ss := strings.Split(z[1], ",")
-		for _, d := range ss {
-			i, _ := strconv.Atoi(d)
-			itemCounts = append(itemCounts, i)
-		}
-		count += countTheWays(z[0], itemCounts)
+		count += countTheWays(v)
 	}
 	return count
 }
 
-// https://old.reddit.com/r/adventofcode/comments/18ghux0/2023_day_12_no_idea_how_to_start_with_this_puzzle/kd0npmi/
-// well, you could analyze the string left to right.
-// if it starts with a ., discard the . and recursively check again.
-// if it starts with a ?, replace the ? with a . and recursively check again,
-//    AND replace it with a # and recursively check again.
-// if it starts with a #, check if it is long enough for the first group,
-//   check if all characters in the first [grouplength] characters are not '.',
-//   and then remove the first [grouplength] chars and the first group number, recursively check again.
-// at some point you will get to the point of having an empty string and more groups to do - that is a zero.
-//   or you have an empty string with zero groups to do - that is a one.
-// there are more rules to check than these few, which are up to you to find. but this is a way to work out the solution.
+func part2(s string) int {
+	// 7017 too low
+	s = strings.TrimSpace(s)
+	data := strings.Split(s, "\n")
+	count := 0
+	for _, v := range data {
+		count += countTheWays2(v)
+	}
+	return count
+}
 
-func countTheWays(s string, groupCounts []int) int {
-	if len(s) == 0 && len(groupCounts) == 0 {
-		return 1
-	} else if len(s) == 0 && len(groupCounts) > 0 {
-		return 0
-	}
-	if s[0] == '.' {
-		return countTheWays(s[1:], groupCounts)
-	}
-	if s[0] == '?' {
-		return countTheWays("."+s[1:], groupCounts) +
-			countTheWays("#"+s[1:], groupCounts)
-	}
-	if s[0] == '#' {
-		if len(s) >= groupCounts[0] {
-			z := s[:groupCounts[0]]
-			if !strings.Contains(z, ".") {
-				return countTheWays(s[groupCounts[0]:], groupCounts[1:])
-			} else {
-				return 0
-			}
+func countTheWays(s string) int {
+	// s = strings.TrimSpace(s)
 
+	d2 := strings.Split(s, " ")
+	s = d2[0]
+	indicator := d2[1]
+	s = strings.ReplaceAll(s, ".", " ")
+	j := strings.Fields(s)
+	s = strings.Join(j, " ")
+
+	qCount := strings.Count(s, "?")
+	count := 0
+	binValue := int(math.Pow(2, float64(qCount)))
+	binHint := strings.Replace("%20b", "20", fmt.Sprint(qCount), 1)
+	mask := strings.Replace(s, "?", "%s", -1)
+	for i := 0; i < binValue; i++ {
+		choices := fmt.Sprintf(binHint, i)
+		choices = strings.Replace(choices, "0", ".", -1)
+		choices = strings.Replace(choices, "1", "#", -1)
+		// for len(choices) > qCount {
+		// 	choices = choices[1:]
+		// }
+		items := []string{}
+		for _, v := range choices {
+			items = append(items, string(v))
 		}
-
+		candidate := mask
+		for _, v := range items {
+			candidate = strings.Replace(candidate, "%s", v, 1)
+		}
+		// candidate := fmt.Sprintf(mask, items)
+		if fitsCriteria(candidate, indicator) {
+			count += 1
+		}
 	}
-	return 0
+	return count
+}
+
+func countTheWays2(s string) int {
+	// s = strings.TrimSpace(s)
+
+	d2 := strings.Split(s, " ")
+	s = d2[0]
+	indicator := d2[1]
+	s = strings.ReplaceAll(s, ".", " ")
+	j := strings.Fields(s)
+	s = strings.Join(j, " ")
+	d3 := []string{}
+	d4 := []string{}
+	for i := 0; i <= 5; i++ {
+		d3 = append(d3, s)
+		d4 = append(d4, indicator)
+	}
+	s = strings.Join(d3, "?")
+	indicator = strings.Join(d4, ",")
+
+	qCount := strings.Count(s, "?")
+	count := 0
+	binValue := int(math.Pow(2, float64(qCount)))
+	binHint := strings.Replace("%20b", "20", fmt.Sprint(qCount), 1)
+	mask := strings.Replace(s, "?", "%s", -1)
+	for i := 0; i < binValue; i++ {
+
+		choices := fmt.Sprintf(binHint, i)
+		choices = strings.Replace(choices, "0", ".", -1)
+		choices = strings.Replace(choices, "1", "#", -1)
+		// for len(choices) > qCount {
+		// 	choices = choices[1:]
+		// }
+		items := []string{}
+		for _, v := range choices {
+			items = append(items, string(v))
+		}
+		candidate := mask
+		for _, v := range items {
+			candidate = strings.Replace(candidate, "%s", v, 1)
+		}
+		// candidate := fmt.Sprintf(mask, items)
+		if fitsCriteria(candidate, indicator) {
+			count += 1
+		}
+	}
+	return count
 }

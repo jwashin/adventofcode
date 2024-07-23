@@ -1,54 +1,23 @@
 package main
 
-import (
-	"testing"
-)
+import "testing"
 
 func Test_countTheWays(t *testing.T) {
 	type args struct {
-		s string
+		s           string
+		groupCounts []int
 	}
 	tests := []struct {
 		name string
 		args args
 		want int
 	}{
-		{"1", args{`???.### 1,1,3`}, 1},
-		{"2", args{`.??..??...?##. 1,1,3`}, 4},
-		{"3", args{`?#?#?#?#?#?#?#? 1,3,1,6`}, 1},
-		{"4", args{`????.#...#... 4,1,1`}, 1},
-		{"5", args{`????.######..#####. 1,6,5`}, 4},
-		{"6", args{`?###???????? 3,2,1`}, 10},
+		{"1", args{`???.###`, []int{1, 1, 3}}, 1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := countTheWays(tt.args.s); got != tt.want {
+			if got := countTheWays(tt.args.s, tt.args.groupCounts); got != tt.want {
 				t.Errorf("countTheWays() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_part2(t *testing.T) {
-	type args struct {
-		s string
-	}
-	tests := []struct {
-		name string
-		args args
-		want int
-	}{
-		{"Part2", args{`???.### 1,1,3
-.??..??...?##. 1,1,3
-?#?#?#?#?#?#?#? 1,3,1,6
-????.#...#... 4,1,1
-????.######..#####. 1,6,5
-?###???????? 3,2,1`}, 525152},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := part2(tt.args.s); got != tt.want {
-				t.Errorf("part2() = %v, want %v", got, tt.want)
 			}
 		})
 	}

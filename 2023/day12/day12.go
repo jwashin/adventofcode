@@ -73,80 +73,83 @@ func getResult(s string) int {
 
 	// we should now be able to
 	// countTheWays(s string, indicator []int)
-	return countTheWays(s, indicator)
+	return countArrangements(s, indicator)
 }
 
-// func countTheWays1(s string, indicator []int) int {
-// 	s = strings.ReplaceAll(s, ".", " ")
-// 	j := strings.Fields(s)
-// 	s = strings.Join(j, " ")
-// 	qCount := strings.Count(s, "?")
-// 	count := 0
-// 	binValue := int(math.Pow(2, float64(qCount)))
-// 	binHint := strings.Replace("%20b", "20", fmt.Sprint(qCount), 1)
-// 	mask := strings.Replace(s, "?", "%s", -1)
-// 	for i := 0; i < binValue; i++ {
-// 		choices := fmt.Sprintf(binHint, i)
-// 		choices = strings.Replace(choices, "0", " ", -1)
-// 		choices = strings.Replace(choices, "1", "#", -1)
-// 		// for len(choices) > qCount {
-// 		// 	choices = choices[1:]
-// 		// }
-// 		items := []string{}
-// 		for _, v := range choices {
-// 			items = append(items, string(v))
-// 		}
-// 		candidate := mask
-// 		for _, v := range items {
-// 			candidate = strings.Replace(candidate, "%s", v, 1)
-// 		}
-// 		// candidate := fmt.Sprintf(mask, items)
-// 		if fitsCriteria(candidate, indicator) {
-// 			count += 1
-// 		}
-// 	}
-// 	return count
-// }
+type cacher struct {
+	s      string
+	damage string
+}
 
-var replacements = []string{"#", "."}
-
-func countTheWays(s string, indicator []int) int {
-	ls := len(s)
-	li := len(indicator)
-	if ls == li && li == 0 {
-		return 1
-	} else if ls != li && (ls == 0 || li == 0) {
-		return 0
+func asString(lst []int) string {
+	s := []string{}
+	for _, v := range lst {
+		s = append(s, fmt.Sprint(v))
 	}
+	return strings.Join(s, ",")
+}
 
-	firstCharacter := s[0]
-	if firstCharacter == '.' {
-		return countTheWays(s[1:], indicator)
-	} else if firstCharacter == '?' {
-		tries := []string{}
-		for _, v := range replacements {
-			tries = append(tries, strings.Replace(s, "?", v, 1))
-		}
-		out := 0
-		for _, av := range tries {
-			out += countTheWays(av, indicator)
-		}
-		return out
-	} else {
-		// '#' is the first char
-		firstN := s[0:indicator[0]]
-		if strings.Count(firstN, "#") == indicator[0] {
-			return countTheWays(s[indicator[0]:], indicator[1:])
-		}
+func countArrangements(springs string, damage []int) int {
 
-		items := []string{}
-		for _, v := range replacements {
-			items = append(items, strings.Replace(s, "?", v, 1))
+	// key := cacher{springs, asString(damage)}
+	// value, ok := cache[key]
+	// if ok {
+	// 	return value
+	// }
+	// if (springs.isEmpty()) return if (damage.isEmpty()) 1 else 0
+	if len(springs) == 0 {
+		if len(damage) == 0 {
+			return 1
+		} else {
+			return 0
 		}
-		count := 0
-		for _, v := range items {
-			count += countTheWays(v, indicator)
-		}
-		return count
 	}
+	if springs[0] == '.' {
+		for springs[0] == '.' {
+			springs = springs[1:]
+		}
+		return countArrangements(springs, damage)
+	}
+	if springs[0] == '?' {
+		docked := springs[1:]
+		s1 := countArrangements("#"+docked, damage)
+		s2 := countArrangements(docked, damage)
+		return s1 + s2
+	}
+	if springs[0] == '#' {
+		if len(damage) == 0 {
+			return 0
+		}
+		// val thisDamage = damage.first()
+		desiredCount := damage[0]
+		if len(springs) >= desiredCount {
+			start := springs[:desiredCount]
+			if strings.Contains(start, ".") {
+				return 0
+			}
+		} else {
+			return 0
+		}
+		end := springs[desiredCount:]
+		if len(end) == 0 {
+			// add to cache
+			return 1
+		}
+		if end[0] == '#' {
+			return 0
+		}
+		return countArrangements(end, damage[1:])
+
+		//         val remainingDamage = damage.drop(1)
+
+		//         if (thisDamage <= springs.length && springs.take(thisDamage).none { it == '.' }) {
+		//             when {
+		//                 thisDamage == springs.length -> if (remainingDamage.isEmpty()) 1 else 0
+		//                 springs[thisDamage] == '#' -> 0
+		//                 else -> countArrangements(springs.drop(thisDamage + 1), remainingDamage, cache)
+		//             }
+		//         } else 0
+
+	}
+	return 0
 }

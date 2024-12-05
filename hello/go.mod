@@ -1,3 +1,3 @@
 module github.com/jwashin/hello
 
-go 1.17
+go 1.23

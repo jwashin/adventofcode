@@ -1,3 +1,5 @@
 *.cache*
 *input.txt
 *paste.go
+*.tmp
+

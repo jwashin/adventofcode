@@ -1,1 +1,23 @@
 package main
+
+type coordinate struct {
+	row int
+	col int
+}
+
+func generateAntiNodes(items map[string][]coordinate) map[coordinate]string {
+ 
+	antinodes := map[coordinate]string{}
+	
+	for k,v := range items{
+	currNode := v[0]
+	antennas := v[1:]
+	for len(antennas) > 0{
+
+		
+	}
+
+
+
+ }
+}
